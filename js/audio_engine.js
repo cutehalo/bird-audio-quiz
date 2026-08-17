@@ -37,6 +37,12 @@ class AudioEngine {
       this.isPlaying = true;
       this.notifyStateChange("playing");
     });
+    this.audioElement.addEventListener("waiting", () => {
+      this.notifyStateChange("loading");
+    });
+    this.audioElement.addEventListener("canplay", () => {
+      this.notifyStateChange("canplay");
+    });
     this.audioElement.addEventListener("error", (e) => {
       console.warn("音频加载发生异常，尝试切换备用源:", this.audioElement.src, e);
       this.handleAudioError();
@@ -98,6 +104,7 @@ class AudioEngine {
       this.audioElement.src = url;
       this.audioElement.currentTime = 0;
       this.audioElement.volume = 1.0;
+      this.notifyStateChange("loading");
       
       const playPromise = this.audioElement.play();
       if (playPromise !== undefined) {
