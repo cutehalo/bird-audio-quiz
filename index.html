@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="听音识鸟 - 中国常见鸟类声音识别挑战赛。聆听真实野外鸟鸣音频，在限定 20 秒内从 4 个选项中识别出正确的鸟类学名，测试你的自然听音力！">
+  <title>听音识鸟 · 中国常见鸟类声音识别挑战赛</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">🕊️</div>
+      <div class="brand-text">
+        <h1>听音识鸟</h1>
+        <p>Bird Audio Quiz · 中国常见鸟类</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" id="header-home-btn" title="返回菜单主页" aria-label="返回菜单主页">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">返回主页</span>
+      </button>
+      <button class="nav-btn open-pokemon-btn" id="header-pokemon-btn" title="查看宝可梦大师图鉴与羁绊" aria-label="宝可梦图鉴与羁绊">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-text">宝可梦图鉴 & 羁绊</span>
+      </button>
+      <button class="nav-btn open-dex-btn" id="header-dex-btn" title="查看 500 种中国鸟类大百科" aria-label="500 种中国鸟类大百科">
+        <span class="nav-icon">📖</span>
+        <span class="nav-text">百鸟图鉴</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主游戏容器 -->
+  <main class="app-container">
+
+    <!-- 1. 欢迎主屏幕 -->
+    <section class="screen active" id="start-screen">
+      <div class="start-card">
+        <div class="hero-badge">🌿 探索大自然的交响乐</div>
+        <h2 class="hero-title">你能辨识多少种<br>中国大自然的鸟鸣？</h2>
+        <p class="hero-subtitle">
+          题库已全面实装 500 种中国鸟类 100% 真实野生录音！支持林鸟/水鸟专训、无尽生存挑战与全新宝可梦图鉴羁绊收集！
+        </p>
+
+        <!-- 训练师状态条 (Pokemon Mode Trainer Status) -->
+        <div class="trainer-status-bar" id="trainer-status-bar">
+          <div class="trainer-avatar-group">
+            <div class="trainer-badge">⚡ Lv.<span id="trainer-level">1</span></div>
+            <div class="trainer-info">
+              <span class="trainer-title">宝可梦听音训练家</span>
+              <span class="trainer-exp-text">经验值: <span id="trainer-exp">0</span> EXP</span>
+            </div>
+          </div>
+
+          <div class="trainer-metrics">
+            <div class="metric-chip stamina-chip" id="stamina-chip" title="每日最多 5 点体力，每 3 小时自动恢复 1 点">
+              <span class="metric-icon">⚡</span>
+              <div class="metric-text">
+                <span class="metric-val" id="stamina-val">5 / 5</span>
+                <span class="metric-sub" id="stamina-countdown">体力充沛</span>
+              </div>
+            </div>
+            <div class="metric-chip collection-chip" title="已点亮 1 星及以上鸟类图鉴">
+              <span class="metric-icon">⭐</span>
+              <div class="metric-text">
+                <span class="metric-val" id="total-collected-val">0 / 500</span>
+                <span class="metric-sub">图鉴星级收集</span>
+              </div>
+            </div>
+            <div class="metric-chip bond-chip" title="已激活同科羁绊共鸣的科属数">
+              <span class="metric-icon">✨</span>
+              <div class="metric-text">
+                <span class="metric-val" id="total-bonds-val">0 科</span>
+                <span class="metric-sub">羁绊共鸣特权</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="pokemon-entry-btn open-pokemon-btn">
+            <span>⚡ 宝可梦图鉴大厅</span>
+          </button>
+        </div>
+
+        <!-- 模式与题库配置选择区 -->
+        <div class="mode-config-card">
+          <!-- 1. 题库生境分类 -->
+          <div class="config-group">
+            <div class="config-title">
+              <span class="icon">🏞️</span>
+              <span>题库生境分类：</span>
+            </div>
+            <div class="config-options" id="pool-selector">
+              <button class="config-chip active" data-pool="all">
+                <span class="chip-icon">🌐</span>
+                <span class="chip-label">全部鸟类</span>
+                <span class="chip-sub">500 种全生态</span>
+              </button>
+              <button class="config-chip" data-pool="forest">
+                <span class="chip-icon">🌲</span>
+                <span class="chip-label">林鸟题库</span>
+                <span class="chip-sub">鸣禽 · 攀禽 · 陆禽</span>
+              </button>
+              <button class="config-chip" data-pool="water">
+                <span class="chip-icon">🌊</span>
+                <span class="chip-label">水鸟题库</span>
+                <span class="chip-sub">游禽 · 涉禽 · 湿地</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. 挑战模式选择 -->
+          <div class="config-group">
+            <div class="config-title">
+              <span class="icon">🎮</span>
+              <span>挑战模式选择：</span>
+            </div>
+            <div class="config-options" id="mode-selector">
+              <button class="config-chip active" data-mode="classic">
+                <span class="chip-icon">🎯</span>
+                <span class="chip-label">经典模式</span>
+                <span class="chip-sub">10 道题速测 · 满分 100 分</span>
+              </button>
+              <button class="config-chip" data-mode="endless">
+                <span class="chip-icon">♾️</span>
+                <span class="chip-label">无尽生存模式</span>
+                <span class="chip-sub">3 次答错机会 · 挑战极限</span>
+              </button>
+              <button class="config-chip" data-mode="pokemon">
+                <span class="chip-icon">⚡</span>
+                <span class="chip-label">宝可梦大师模式</span>
+                <span class="chip-sub">消耗 1 体力 · 积分兑换道具 · 每 5 连胜积分多翻 1 倍 · 3 星图鉴 & 羁绊</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 测试调试模式开关 -->
+          <div class="debug-toggle-box">
+            <label class="debug-toggle-label" title="勾选后：宝可梦模式无限体力，且答题时直接显示正确答案以供测试">
+              <input type="checkbox" id="debug-mode-checkbox" />
+              <span class="debug-checkbox-custom"></span>
+              <span class="debug-toggle-text">🛠️ 开启测试调试模式 (体力无限 · 题目透视正确答案)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cta-group">
+          <button class="primary-btn" id="start-game-btn">
+            <span>开始挑战</span>
+            <span>🎧</span>
+          </button>
+          <button class="secondary-link-btn open-dex-btn">📖 打开 500 鸟类自然大百科</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 答题进行中屏幕 -->
+    <section class="screen" id="quiz-screen">
+      <!-- 答题状态栏 -->
+      <div class="quiz-header">
+        <div class="quiz-pill" id="round-indicator">第 1 / 10 题</div>
+        <div class="quiz-pill lives-pill" id="lives-indicator" style="display: none;">
+          <span class="lives-label">生命:</span>
+          <span class="lives-hearts" id="lives-hearts">❤️❤️❤️</span>
+        </div>
+        <div class="timer-wrapper">
+          <span style="font-size: 13px; color: var(--text-dim);">剩余</span>
+          <div class="timer-tag" id="timer-text">20s</div>
+        </div>
+        <div class="quiz-pill" id="score-indicator" style="color: var(--amber-400);">得分: 0</div>
+      </div>
+
+      <!-- 倒计时动态进度条 -->
+      <div class="progress-track">
+        <div class="progress-fill" id="timer-bar" style="width: 100%;"></div>
+      </div>
+
+      <!-- 调试模式透视答案横幅 -->
+      <div class="debug-answer-banner" id="debug-answer-banner" style="display: none;">
+        <span class="debug-icon">🛠️</span>
+        <span class="debug-text" id="debug-answer-text">【调试答案透视】正确答案：<strong id="debug-correct-name">--</strong></span>
+      </div>
+
+      <!-- 连胜加成与状态提示横幅 -->
+      <div class="bonus-status-banner" id="bonus-status-banner" style="display: none;">
+        <span class="bonus-icon" id="bonus-icon">🔥</span>
+        <span class="bonus-text" id="bonus-text">连续答对 3 题！下一题积分翻倍 (x2)！</span>
+      </div>
+
+      <!-- 宝可梦野外遭遇与熟练度状态条 -->
+      <div class="pokemon-encounter-banner" id="pokemon-encounter-banner" style="display: none;">
+        <span class="encounter-icon">⚡</span>
+        <div class="encounter-info">
+          <span class="encounter-text" id="encounter-text">野外遭遇鸟类 · 捕获并升级图鉴星级！</span>
+          <span class="encounter-bond-tag" id="encounter-bond-tag" style="display: none;">✨ 同科羁绊生效中：仅需 3 次升级</span>
+        </div>
+      </div>
+
+      <!-- 声音播放与声波可视化 -->
+      <div class="audio-card">
+        <div class="visualizer-container">
+          <canvas id="visualizer-canvas" width="700" height="110"></canvas>
+        </div>
+        <div class="audio-controls">
+          <button class="play-audio-btn" id="play-audio-btn">
+            <span class="play-icon">▶️</span>
+            <span>播放鸟鸣音频 (空格键)</span>
+          </button>
+          <div class="audio-status-text" id="audio-status-text">真实野生录音就绪</div>
+        </div>
+      </div>
+
+      <!-- 智能道具操作栏 (每局拥有各 3 个道具) -->
+      <div class="props-toolbar">
+        <button class="prop-btn" id="prop-remove-btn" title="排除 2 个错误干扰选项 (每局 3 次)">
+          <span class="prop-icon">✂️</span>
+          <div class="prop-info">
+            <span class="prop-name">排除二错</span>
+            <span class="prop-badge" id="prop-remove-count">x3</span>
+          </div>
+        </button>
+        <button class="prop-btn" id="prop-time-btn" title="将本题倒计时重置并延长至 60 秒 (每局 3 次)">
+          <span class="prop-icon">⏳</span>
+          <div class="prop-info">
+            <span class="prop-name">延至60秒</span>
+            <span class="prop-badge" id="prop-time-count">x3</span>
+          </div>
+        </button>
+        <button class="prop-btn" id="prop-double-btn" title="本题基础得分直接翻倍 (每局 3 次)">
+          <span class="prop-icon">⚡</span>
+          <div class="prop-info">
+            <span class="prop-name">双倍计分</span>
+            <span class="prop-badge" id="prop-double-count">x3</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- 四选一选项区域 -->
+      <div class="options-grid" id="options-grid">
+        <!-- 动态生成 4 个选项 -->
+      </div>
+
+      <!-- 下一题操作区 (置于反馈卡片上方，手机端点击更便捷无需翻屏) -->
+      <div class="action-area">
+        <button class="next-btn" id="next-btn">下一题 →</button>
+      </div>
+
+      <!-- 答题反馈与鸟类卡片 (回答后出现) -->
+      <div class="feedback-card" id="feedback-card">
+        <div class="feedback-title" id="feedback-title"></div>
+        <div class="feedback-bird-info">
+          <div class="feedback-bird-name" id="feedback-bird-name"></div>
+          <div class="feedback-bird-latin" id="feedback-bird-latin"></div>
+          <div class="feedback-detail" id="feedback-voice"></div>
+          <div class="feedback-detail" id="feedback-fact"></div>
+          <div id="pokemon-feedback-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 最终结算与复盘屏幕 -->
+    <section class="screen" id="summary-screen">
+      <div class="summary-card">
+        <div class="hero-badge" id="summary-mode-badge">🏁 挑战完成 · 经典模式</div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #ffffff;" id="summary-heading">本次答题总成绩</h2>
+        
+        <div class="score-display-wrapper">
+          <div class="score-num-box">
+            <span class="final-score" id="final-score">100</span>
+            <span class="final-score-total" id="final-score-unit">/ 100 分</span>
+          </div>
+          <div class="score-badge badge-gold" id="score-badge">🌟 观鸟宗师 · 金牌听音师</div>
+          <p class="score-summary-text" id="score-summary-text">
+            耳聪目明！你对中国常见鸟类的鸣叫了如指掌，是当之无愧的听音大师！
+          </p>
+        </div>
+
+        <!-- 详细数据指标 -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-correct">10 / 10</div>
+            <div class="stat-label">答对题数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-accuracy">100%</div>
+            <div class="stat-label">正确率</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-time">3.2s</div>
+            <div class="stat-label">平均答题速度</div>
+          </div>
+        </div>
+
+      <div class="summary-actions">
+        <button class="primary-btn" id="restart-btn">
+          <span>再来一局</span>
+          <span>🔄</span>
+        </button>
+        <button class="nav-btn open-dex-btn" style="padding: 12px 24px; font-size: 15px;">
+          <span>📖 500 鸟类大百科</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 逐题复盘与重听清单 -->
+    <div class="review-section">
+      <h3 class="section-title">
+        <span>📋</span>
+        <span>答题详情与错题复盘 (可重听野外实录)</span>
+      </h3>
+      <div class="review-list" id="review-list">
+        <!-- 动态渲染 10 道题复盘信息 -->
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 500 鸟类大百科图鉴模态窗 -->
+<div class="modal-overlay" id="bird-dex-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h3 style="margin: 0; font-size: 20px;">📖 中国鸟类自然大百科 (500 种)</h3>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-dim);">
+          涵盖中国常见鸣禽、涉禽、游禽、猛禽、攀禽与陆禽，支持即时搜索与原声试听
+        </p>
+      </div>
+      <button class="modal-close-btn" id="close-dex-btn">✕</button>
+    </div>
+
+    <!-- 分类筛选 Chips -->
+    <div class="dex-filters" id="dex-filters">
+      <button class="filter-chip active" data-category="all">全部 (500)</button>
+      <button class="filter-chip" data-category="鸣禽">鸣禽 (歌鸟)</button>
+      <button class="filter-chip" data-category="涉禽">涉禽 (湿地水鸟)</button>
+      <button class="filter-chip" data-category="游禽">游禽 (水面潜水)</button>
+      <button class="filter-chip" data-category="猛禽">猛禽 (鹰隼猫头鹰)</button>
+      <button class="filter-chip" data-category="攀禽">攀禽 (翠鸟/啄木鸟)</button>
+      <button class="filter-chip" data-category="陆禽">陆禽 (雉类/斑鸠)</button>
+    </div>
+
+    <!-- 搜索栏与分页控制 -->
+    <div class="dex-search-row">
+      <div class="dex-search-box">
+        <input 
+          type="text" 
+          class="dex-search-input" 
+          id="dex-search" 
+          placeholder="搜索鸟名、拉丁学名、科属（如：麻雀、鹎、翠鸟、猫头鹰、白鹭...）" 
+        />
+      </div>
+      <div class="dex-pagination-bar" id="dex-pagination-bar">
+        <button class="page-btn" id="prev-page-btn" disabled>‹ 上一页</button>
+        <span class="page-info" id="page-info">第 1 / 13 页 (共 500 种)</span>
+        <button class="page-btn" id="next-page-btn">下一页 ›</button>
+      </div>
+    </div>
+
+    <!-- 500 鸟类卡片网格 -->
+    <div class="dex-grid" id="dex-grid">
+      <!-- 动态分页渲染 500 种鸟类卡片 -->
+    </div>
+  </div>
+</div>
+
+<!-- 4. 宝可梦大师图鉴与同科羁绊殿堂模态窗 -->
+<div class="modal-overlay" id="pokemon-dex-modal">
+  <div class="modal-card pokemon-modal-card">
+    <div class="modal-header">
+      <div>
+        <h3 style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+          <span>⚡</span>
+          <span>宝可梦大师图鉴 & 同科羁绊殿堂</span>
+        </h3>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-dim);">
+          指数曲线答对收集 3 星图鉴 · 同科收集 ≥ 5 张 1 星卡激活专属羁绊特权
+        </p>
+      </div>
+      <button class="modal-close-btn" id="close-pokemon-dex-btn">✕</button>
+    </div>
+
+    <!-- 选项卡切换: 图鉴收集 vs 羁绊殿堂 -->
+    <div class="pokemon-tabs">
+      <button class="pokemon-tab-btn active" data-tab="dex" id="tab-btn-dex">
+        <span>📖 500 鸟类星级图鉴</span>
+      </button>
+      <button class="pokemon-tab-btn" data-tab="bonds" id="tab-btn-bonds">
+        <span>✨ 同科羁绊殿堂 (<span id="bonds-count-tab">0</span>/48)</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: 500 鸟类星级图鉴 -->
+    <div class="pokemon-tab-content active" id="tab-pokemon-dex">
+      <div class="dex-filters" id="pokemon-dex-filters">
+        <button class="filter-chip active" data-star="all">全部星级</button>
+        <button class="filter-chip" data-star="3">⭐⭐⭐ 3星大师</button>
+        <button class="filter-chip" data-star="2">⭐⭐ 2星进阶</button>
+        <button class="filter-chip" data-star="1">⭐ 1星初遇</button>
+        <button class="filter-chip" data-star="0">未点亮图鉴</button>
+        <button class="filter-chip" data-star="bonded">⚡ 羁绊加速中</button>
+      </div>
+
+      <div class="dex-search-row">
+        <div class="dex-search-box">
+          <input 
+            type="text" 
+            class="dex-search-input" 
+            id="pokemon-search" 
+            placeholder="搜索鸟名、拉丁学名、科属（如：麻雀、鹎、翠鸟、山雀、鸭科...）" 
+          />
+        </div>
+        <div class="dex-pagination-bar">
+          <button class="page-btn" id="pokemon-prev-page" disabled>‹ 上一页</button>
+          <span class="page-info" id="pokemon-page-info">第 1 / 13 页</span>
+          <button class="page-btn" id="pokemon-next-page">下一页 ›</button>
+        </div>
+      </div>
+
+      <!-- 宝可梦风格卡片网格 -->
+      <div class="pokemon-grid" id="pokemon-grid">
+        <!-- 动态渲染卡片 -->
+      </div>
+    </div>
+
+    <!-- TAB 2: 同科羁绊殿堂 -->
+    <div class="pokemon-tab-content" id="tab-pokemon-bonds" style="display: none;">
+      <div class="bond-intro-card">
+        <span class="bond-intro-icon">✨</span>
+        <div class="bond-intro-text">
+          <h4 style="margin:0 0 4px 0; color:var(--amber-300);">同目同科羁绊共鸣规则</h4>
+          <p style="margin:0; font-size:13px; color:var(--text-secondary); line-height:1.5;">
+            在同一个科属下，累计收集 <strong>5 张 1星及以上鸟类卡片</strong> 即可激活该科专属羁绊卡！激活后，该科所有鸟类提升星级所需答对次数大幅减少至 <strong>仅需 3 次</strong> 即可突破下一级别！
+          </p>
+        </div>
+      </div>
+
+      <div class="bonds-grid" id="bonds-grid">
+        <!-- 动态渲染科属羁绊卡片 -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="app-footer">
+  <p>听音识鸟 · 中国常见鸟类生物声学互动挑战 | 声音源自 Xeno-canto / Wikimedia Commons (CC 授权)</p>
+</footer>
+
+<!-- 引入脚本 -->
+<script src="js/birds_data.js"></script>
+<script src="js/audio_engine.js"></script>
+<script src="js/pokemon_mode.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
