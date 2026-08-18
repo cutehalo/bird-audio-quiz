@@ -69,8 +69,9 @@ class BirdQuizGame {
     this.pokemonPageSize = 36;
     this.pokemonActiveTab = "dex"; // 'dex' | 'bonds'
 
-    // 倒计时与音频播放状态 (未加载播放时不走秒)
+    // 倒计时与音频播放状态 (严格检测音频真实播放状态，未播放或缓冲时不走秒)
     this.isTimerStarted = false;
+    this.isTimerPaused = false;
     this.audioFallbackTimer = null;
 
     // DOM 元素引用缓存
@@ -1044,48 +1045,45 @@ class BirdQuizGame {
       this.dom.optionsGrid.appendChild(btn);
     });
 
-    // 准备倒计时（音频文件未加载播放时不开始计时）
+    // 准备倒计时（严格等待音频真实播放才开始走秒，缓冲或未播放时不扣时间）
     this.isTimerStarted = false;
+    this.isTimerPaused = false;
     this.clearTimer();
     this.timeLeft = this.timeLimit;
-    this.questionStartTime = Date.now();
+    this.questionStartTime = null;
     this.updateTimerUI();
     this.dom.timerText.textContent = `${this.timeLimit}s`;
-    this.dom.audioStatusText.textContent = "正在缓冲野生鸟鸣录音，播放后开始计时...";
+    this.dom.audioStatusText.textContent = "🎧 正在加载野生鸟鸣录音，播放后开始计时...";
 
     // 自动播放鸟鸣音频
     if (window.birdAudioEngine) {
       window.birdAudioEngine.playBird(currentQ.bird);
     }
-
-    // 兜底保护：若浏览器策略拦截自动播放或网络延迟超过 4 秒，自动启动计时
-    if (this.audioFallbackTimer) clearTimeout(this.audioFallbackTimer);
-    this.audioFallbackTimer = setTimeout(() => {
-      if (!this.isTimerStarted && !this.isAnswered && this.dom.quizScreen.classList.contains("active")) {
-        this.triggerTimerStart();
-      }
-    }, 4000);
   }
 
-  // 触发倒计时启动 (确保在音频开始播放后才正式走秒)
+  // 触发/恢复倒计时启动 (确保在音频产生真实声音后才正式走秒)
   triggerTimerStart() {
-    if (this.isTimerStarted || this.isAnswered || !this.dom.quizScreen.classList.contains("active")) return;
-    this.isTimerStarted = true;
-    if (this.audioFallbackTimer) {
-      clearTimeout(this.audioFallbackTimer);
-      this.audioFallbackTimer = null;
+    if (this.isAnswered || !this.dom.quizScreen.classList.contains("active")) return;
+    if (!this.isTimerStarted) {
+      this.isTimerStarted = true;
+      this.startTimer();
+    } else if (this.isTimerPaused) {
+      this.resumeTimer();
     }
-    this.startTimer();
   }
 
   // 启动倒计时
   startTimer() {
     this.clearTimer();
-    this.timeLeft = this.timeLimit;
-    this.questionStartTime = Date.now();
+    this.isTimerPaused = false;
+    if (!this.questionStartTime) {
+      this.questionStartTime = Date.now();
+    }
     this.updateTimerUI();
 
     this.timerInterval = setInterval(() => {
+      if (this.isTimerPaused) return;
+
       this.timeLeft -= 0.1;
       if (this.timeLeft <= 0) {
         this.timeLeft = 0;
@@ -1096,11 +1094,24 @@ class BirdQuizGame {
     }, 100);
   }
 
+  // 音频缓冲中：自动暂停倒计时走秒
+  pauseTimer() {
+    if (!this.isTimerStarted || this.isAnswered) return;
+    this.isTimerPaused = true;
+  }
+
+  // 音频恢复播放：恢复倒计时走秒
+  resumeTimer() {
+    if (!this.isTimerStarted || this.isAnswered) return;
+    this.isTimerPaused = false;
+  }
+
   clearTimer() {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
+    this.isTimerPaused = false;
     if (this.audioFallbackTimer) {
       clearTimeout(this.audioFallbackTimer);
       this.audioFallbackTimer = null;
@@ -1130,7 +1141,9 @@ class BirdQuizGame {
     this.updatePropsUI();
 
     const currentQ = this.questions[this.currentRound];
-    const duration = ((Date.now() - this.questionStartTime) / 1000).toFixed(1);
+    const duration = this.questionStartTime
+      ? ((Date.now() - this.questionStartTime) / 1000).toFixed(1)
+      : "0.5";
     const timeNum = parseFloat(duration);
     const isCorrect = selectedName === currentQ.correctAnswer;
 
@@ -1909,20 +1922,27 @@ class BirdQuizGame {
     });
   }
 
-  // 更新播放按钮视觉状态
+  // 更新播放按钮视觉状态并与倒计时联动
   updateAudioButtonUI(state, payload) {
     if (this.dom.playAudioBtn) {
       if (state === "loading") {
+        // 音频正在缓冲：自动暂停倒计时走秒，避免网络吃掉用户答题时间
+        this.pauseTimer();
+
         this.dom.playAudioBtn.classList.remove("playing");
         this.dom.playAudioBtn.innerHTML = `
           <span class="play-icon">⏳</span>
           <span>正在缓冲音频...</span>
         `;
         if (!this.isAnswered) {
-          this.dom.audioStatusText.textContent = "正在缓冲野生鸟鸣录音，开始播放后启动计时...";
+          if (this.isTimerStarted) {
+            this.dom.audioStatusText.textContent = "⏳ 音频网络缓冲中，倒计时已为您自动暂停...";
+          } else {
+            this.dom.audioStatusText.textContent = "🎧 正在加载野生鸟鸣录音，播放后开始计时...";
+          }
         }
       } else if (payload && payload.isPlaying) {
-        // 音频开始实际播放，触发启动倒计时！
+        // 音频真实开始播放：启动/恢复倒计时走秒！
         this.triggerTimerStart();
 
         this.dom.playAudioBtn.classList.add("playing");
@@ -1933,7 +1953,18 @@ class BirdQuizGame {
         if (this.isAnswered) {
           this.dom.audioStatusText.textContent = `正在播放【${payload.bird ? payload.bird.name : "野外鸟鸣"}】真实录音`;
         } else {
-          this.dom.audioStatusText.textContent = "正在播放野外真实鸟鸣... (作答后揭晓学名)";
+          this.dom.audioStatusText.textContent = "🔊 正在播放野外真实鸟鸣... (作答后揭晓学名)";
+        }
+      } else if (state === "paused") {
+        this.dom.playAudioBtn.classList.remove("playing");
+        this.dom.playAudioBtn.innerHTML = `
+          <span class="play-icon">▶️</span>
+          <span>重播真实鸟鸣 (空格键)</span>
+        `;
+        if (!this.isAnswered && !this.isTimerStarted) {
+          this.dom.audioStatusText.textContent = "▶️ 音频已就绪，点击播放按钮开始答题";
+        } else if (!this.isAnswered) {
+          this.dom.audioStatusText.textContent = "音频已就绪 · 可按键盘 1/2/3/4 作答";
         }
       } else {
         this.dom.playAudioBtn.classList.remove("playing");
@@ -1941,7 +1972,9 @@ class BirdQuizGame {
           <span class="play-icon">▶️</span>
           <span>重播真实鸟鸣 (空格键)</span>
         `;
-        this.dom.audioStatusText.textContent = "音频已就绪 · 可按键盘 1/2/3/4 作答";
+        if (!this.isAnswered) {
+          this.dom.audioStatusText.textContent = "音频已就绪 · 可按键盘 1/2/3/4 作答";
+        }
       }
     }
   }

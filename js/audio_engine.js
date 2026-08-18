@@ -24,24 +24,42 @@ class AudioEngine {
     this.canvasCtx = null;
     this.animationId = null;
 
-    // 绑定音频播放器事件
-    this.audioElement.addEventListener("ended", () => {
+    // 绑定音频播放器事件 (精确跟踪缓冲与真实播放)
+    this.audioElement.addEventListener("loadstart", () => {
       this.isPlaying = false;
-      this.notifyStateChange("ended");
+      this.notifyStateChange("loading");
     });
-    this.audioElement.addEventListener("pause", () => {
+    this.audioElement.addEventListener("waiting", () => {
       this.isPlaying = false;
-      this.notifyStateChange("paused");
+      this.notifyStateChange("loading");
+    });
+    this.audioElement.addEventListener("stalled", () => {
+      this.isPlaying = false;
+      this.notifyStateChange("loading");
+    });
+    this.audioElement.addEventListener("seeking", () => {
+      this.isPlaying = false;
+      this.notifyStateChange("loading");
     });
     this.audioElement.addEventListener("playing", () => {
       this.isPlaying = true;
       this.notifyStateChange("playing");
     });
-    this.audioElement.addEventListener("waiting", () => {
-      this.notifyStateChange("loading");
+    this.audioElement.addEventListener("timeupdate", () => {
+      if (this.audioElement.currentTime > 0 && !this.audioElement.paused && !this.audioElement.ended) {
+        if (!this.isPlaying) {
+          this.isPlaying = true;
+          this.notifyStateChange("playing");
+        }
+      }
     });
-    this.audioElement.addEventListener("canplay", () => {
-      this.notifyStateChange("canplay");
+    this.audioElement.addEventListener("pause", () => {
+      this.isPlaying = false;
+      this.notifyStateChange("paused");
+    });
+    this.audioElement.addEventListener("ended", () => {
+      this.isPlaying = false;
+      this.notifyStateChange("ended");
     });
     this.audioElement.addEventListener("error", (e) => {
       console.warn("音频加载发生异常，尝试切换备用源:", this.audioElement.src, e);
@@ -74,8 +92,20 @@ class AudioEngine {
       cb(state, {
         bird: this.currentBird,
         isPlaying: this.isPlaying,
-        src: this.audioElement.src
+        src: this.audioElement.src,
+        currentTime: this.audioElement.currentTime
       })
+    );
+  }
+
+  // 判断是否正在产生声音播放
+  isActuallyPlaying() {
+    return (
+      this.audioElement &&
+      !this.audioElement.paused &&
+      !this.audioElement.ended &&
+      this.audioElement.readyState >= 2 &&
+      this.audioElement.currentTime > 0
     );
   }
 
@@ -101,6 +131,7 @@ class AudioEngine {
 
   loadAndPlayUrl(url) {
     try {
+      this.isPlaying = false;
       this.audioElement.src = url;
       this.audioElement.currentTime = 0;
       this.audioElement.volume = 1.0;
@@ -110,12 +141,10 @@ class AudioEngine {
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            this.isPlaying = true;
-            this.notifyStateChange("playing");
+            // 播放请求被接收，实际开声由 playing / timeupdate 派发通知
           })
           .catch((err) => {
             console.warn("浏览器自动播放被拦截或文件需用户交互:", err);
-            // 如果是自动播放拦截，不作为错误切源
             this.isPlaying = false;
             this.notifyStateChange("paused");
           });
