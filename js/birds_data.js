@@ -1,4 +1,4 @@
-﻿/**
+/**
  * China 500 Birds Database - 100% Standard Chinese Scientific Names (涓枃瀛﹀悕) & Real Audio
  */
 
@@ -122,9 +122,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "turnix_suscitator",
-    name: "黄脚三趾鹑",
+    name: "棕三趾鹑",
     latin: "Turnix suscitator",
-    pinyin: "huáng jiǎo sān zhǐ chún",
+    pinyin: "zōng sān zhǐ chún",
     orderFamily: "鸻形目 · 三趾鹑科",
     category: "陆禽",
     hasAudio: true,
@@ -603,9 +603,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "gallinago_hardwickii",
-    name: "大沙锥",
+    name: "大地鹬",
     latin: "Gallinago hardwickii",
-    pinyin: "dà shā zhuī",
+    pinyin: "dà dì yù",
     orderFamily: "鸻形目 · 鹬科",
     category: "涉禽",
     hasAudio: true,
@@ -980,9 +980,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "larus_schistisagus",
-    name: "虎头海鸥",
+    name: "灰背鸥",
     latin: "Larus schistisagus",
-    pinyin: "hǔ tóu hǎi ōu",
+    pinyin: "huī bèi ōu",
     orderFamily: "鸻形目 · 鸥科",
     category: "涉禽",
     hasAudio: true,
@@ -1279,9 +1279,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "pterorhinus_ruficeps",
-    name: "红头噪鹛",
+    name: "白喉噪鹛",
     latin: "Pterorhinus ruficeps",
-    pinyin: "hóng tóu zào méi",
+    pinyin: "bái hóu zào méi",
     orderFamily: "雀形目 · 噪鹛科",
     category: "鸣禽",
     hasAudio: true,
@@ -3437,9 +3437,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "prinia_socialis",
-    name: "暗冠山鹪莺",
+    name: "灰胸山鹪莺",
     latin: "Prinia socialis",
-    pinyin: "àn guān shān jiāo yīng",
+    pinyin: "huī xiōng shān jiāo yīng",
     orderFamily: "雀形目 · 扇尾莺科",
     category: "鸣禽",
     hasAudio: true,
@@ -4100,9 +4100,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "gallinago_megala",
-    name: "高中沙锥",
+    name: "大沙锥",
     latin: "Gallinago megala",
-    pinyin: "gāo zhōng shā zhuī",
+    pinyin: "dà shā zhuī",
     orderFamily: "鸻形目 · 鹬科",
     category: "涉禽",
     hasAudio: true,
@@ -4360,9 +4360,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "cyanoptila_cumatilis",
-    name: "白腹蓝姬鹟",
+    name: "琉璃蓝鹟",
     latin: "Cyanoptila cumatilis",
-    pinyin: "bái fù lán jī wēng",
+    pinyin: "liú lí lán wēng",
     orderFamily: "雀形目 · 鹟科",
     category: "鸣禽",
     hasAudio: true,
@@ -6037,9 +6037,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "treron_bicinctus",
-    name: "双条尾绿鸠",
+    name: "橙胸绿鸠",
     latin: "Treron bicinctus",
-    pinyin: "shuāng tiáo wěi lǜ jiū",
+    pinyin: "chéng xiōng lǜ jiū",
     orderFamily: "鸽形目 · 鸠鸽科",
     category: "陆禽",
     hasAudio: true,
@@ -6063,9 +6063,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "periparus_rubidiventris",
-    name: "红腹山雀",
+    name: "黑冠山雀",
     latin: "Periparus rubidiventris",
-    pinyin: "hóng fù shān què",
+    pinyin: "hēi guān shān què",
     orderFamily: "雀形目 · 山雀科",
     category: "鸣禽",
     hasAudio: true,
@@ -6349,9 +6349,9 @@ const BIRDS_500_DATA = [
   },
   {
     id: "halcyon_smyrnensis",
-    name: "蓝翡翠",
+    name: "白胸翡翠",
     latin: "Halcyon smyrnensis",
-    pinyin: "lán fěi cuì",
+    pinyin: "bái xiōng fěi cuì",
     orderFamily: "佛法僧目 · 翠鸟科",
     category: "攀禽",
     hasAudio: true,
