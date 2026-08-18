@@ -91,12 +91,12 @@
           <div class="config-group">
             <div class="config-title">
               <span class="icon">🏞️</span>
-              <span>题库生境分类：</span>
+              <span>1. 题库生境分类：</span>
             </div>
             <div class="config-options" id="pool-selector">
               <button class="config-chip active" data-pool="all">
                 <span class="chip-icon">🌐</span>
-                <span class="chip-label">全部鸟类</span>
+                <span class="chip-label">全部生境</span>
                 <span class="chip-sub">500 种全生态</span>
               </button>
               <button class="config-chip" data-pool="forest">
@@ -112,11 +112,139 @@
             </div>
           </div>
 
-          <!-- 2. 挑战模式选择 -->
+          <!-- 2. 识别难度等级 (按常见程度选择) -->
+          <div class="config-group">
+            <div class="config-title">
+              <span class="icon">⭐</span>
+              <span>2. 识别难度等级：</span>
+            </div>
+            <div class="config-options" id="difficulty-selector">
+              <button class="config-chip" data-difficulty="easy">
+                <span class="chip-icon">🌱</span>
+                <span class="chip-label">简单 (前 20%)</span>
+                <span class="chip-sub">最常见野生鸟类 · 适合新手</span>
+              </button>
+              <button class="config-chip" data-difficulty="normal">
+                <span class="chip-icon">🌿</span>
+                <span class="chip-label">普通 (前 50%)</span>
+                <span class="chip-sub">中等常见鸟类 · 进阶挑战</span>
+              </button>
+              <button class="config-chip active" data-difficulty="hard">
+                <span class="chip-icon">🦅</span>
+                <span class="chip-label">困难 (全 100%)</span>
+                <span class="chip-sub">全部物种 · 观鸟大师</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 地理区域与省级题库 -->
+          <div class="config-group">
+            <div class="config-title">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="icon">📍</span>
+                <span>3. 区域与省级题库：</span>
+              </div>
+              <span class="pool-count-badge" id="pool-count-badge">🎯 当前匹配: 500 种</span>
+            </div>
+
+            <!-- 快捷大区选择 -->
+            <div class="config-options region-options" id="region-selector">
+              <button class="config-chip active" data-region="all">
+                <span class="chip-icon">🇨🇳</span>
+                <span class="chip-label">全国分布</span>
+              </button>
+              <button class="config-chip" data-region="north">
+                <span class="chip-icon">🏛️</span>
+                <span class="chip-label">华北地区</span>
+              </button>
+              <button class="config-chip" data-region="northeast">
+                <span class="chip-icon">🌲</span>
+                <span class="chip-label">东北地区</span>
+              </button>
+              <button class="config-chip" data-region="east">
+                <span class="chip-icon">🌊</span>
+                <span class="chip-label">华东地区</span>
+              </button>
+              <button class="config-chip" data-region="central">
+                <span class="chip-icon">🌾</span>
+                <span class="chip-label">华中地区</span>
+              </button>
+              <button class="config-chip" data-region="south">
+                <span class="chip-icon">🌴</span>
+                <span class="chip-label">华南地区</span>
+              </button>
+              <button class="config-chip" data-region="southwest">
+                <span class="chip-icon">⛰️</span>
+                <span class="chip-label">西南地区</span>
+              </button>
+              <button class="config-chip" data-region="northwest">
+                <span class="chip-icon">🏜️</span>
+                <span class="chip-label">西北地区</span>
+              </button>
+            </div>
+
+            <!-- 省级行政区细选下拉菜单 -->
+            <div class="province-picker-row">
+              <span class="province-picker-label">🗺️ 精确定位至省级行政区：</span>
+              <select class="province-select" id="province-select">
+                <option value="all">全国 / 不限省份 (大区默认)</option>
+                <optgroup label="🏛️ 华北地区">
+                  <option value="北京">北京市</option>
+                  <option value="天津">天津市</option>
+                  <option value="河北">河北省</option>
+                  <option value="山西">山西省</option>
+                  <option value="内蒙古">内蒙古自治区</option>
+                </optgroup>
+                <optgroup label="🌲 东北地区">
+                  <option value="辽宁">辽宁省</option>
+                  <option value="吉林">吉林省</option>
+                  <option value="黑龙江">黑龙江省</option>
+                </optgroup>
+                <optgroup label="🌊 华东地区">
+                  <option value="上海">上海市</option>
+                  <option value="江苏">江苏省</option>
+                  <option value="浙江">浙江省</option>
+                  <option value="安徽">安徽省</option>
+                  <option value="福建">福建省</option>
+                  <option value="江西">江西省</option>
+                  <option value="山东">山东省</option>
+                </optgroup>
+                <optgroup label="🌾 华中地区">
+                  <option value="河南">河南省</option>
+                  <option value="湖北">湖北省</option>
+                  <option value="湖南">湖南省</option>
+                </optgroup>
+                <optgroup label="🌴 华南地区">
+                  <option value="广东">广东省</option>
+                  <option value="广西">广西壮族自治区</option>
+                  <option value="海南">海南省</option>
+                  <option value="香港">香港特别行政区</option>
+                  <option value="澳门">澳门特别行政区</option>
+                  <option value="台湾">台湾省</option>
+                </optgroup>
+                <optgroup label="⛰️ 西南地区">
+                  <option value="重庆">重庆市</option>
+                  <option value="四川">四川省</option>
+                  <option value="贵州">贵州省</option>
+                  <option value="云南">云南省</option>
+                  <option value="西藏">西藏自治区</option>
+                </optgroup>
+                <optgroup label="🏜️ 西北地区">
+                  <option value="陕西">陕西省</option>
+                  <option value="甘肃">甘肃省</option>
+                  <option value="青海">青海省</option>
+                  <option value="宁夏">宁夏回族自治区</option>
+                  <option value="新疆">新疆维吾尔自治区</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <!-- 4. 挑战模式选择 -->
           <div class="config-group">
             <div class="config-title">
               <span class="icon">🎮</span>
-              <span>挑战模式选择：</span>
+              <span>4. 挑战模式选择：</span>
             </div>
             <div class="config-options" id="mode-selector">
               <button class="config-chip active" data-mode="classic">
@@ -438,6 +566,7 @@
 
 <!-- 引入脚本 -->
 <script src="js/birds_data.js"></script>
+<script src="js/region_data.js"></script>
 <script src="js/audio_engine.js"></script>
 <script src="js/pokemon_mode.js"></script>
 <script src="js/game.js"></script>

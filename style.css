@@ -354,6 +354,111 @@ body {
   color: var(--emerald-100);
 }
 
+/* 题库实时匹配数量徽章 */
+.pool-count-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber-300);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-left: auto;
+  letter-spacing: 0.3px;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+  transition: all 0.25s ease;
+}
+
+/* 区域快速选择网格 (8个大区) */
+.region-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.region-options .config-chip {
+  padding: 8px 10px;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.region-options .config-chip .chip-label {
+  font-size: 13px;
+}
+
+.region-options .config-chip .chip-icon {
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* 省级行政区细化下拉选单 */
+.province-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(13, 38, 28, 0.6);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-top: 4px;
+}
+
+.province-picker-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.province-select {
+  flex: 1;
+  max-width: 280px;
+  background: rgba(4, 20, 14, 0.9);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.province-select:hover,
+.province-select:focus {
+  border-color: var(--emerald-400);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.25);
+  background: rgba(6, 26, 18, 0.95);
+}
+
+.province-select optgroup {
+  background: #092016;
+  color: var(--emerald-400);
+  font-weight: 700;
+}
+
+.province-select option {
+  background: #061710;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .province-picker-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .province-select {
+    max-width: 100%;
+  }
+}
+
 /* 生命值与连胜指示器 */
 .lives-pill {
   display: inline-flex;

@@ -49,6 +49,13 @@ class BirdQuizGame {
     this.questionStartTime = 0;
     this.isAnswered = false;
 
+    // 模式、难度与题库区域配置状态
+    this.selectedPool = "all"; // 'all' | 'forest' | 'water'
+    this.selectedDifficulty = "hard"; // 'easy' | 'normal' | 'hard'
+    this.selectedRegion = "all"; // 'all' | 'north' | 'northeast' | 'east' | 'central' | 'south' | 'southwest' | 'northwest'
+    this.selectedProvince = "all"; // 'all' | '北京' | '广东' | '四川' ...
+    this.gameMode = "classic"; // 'classic' | 'endless' | 'pokemon'
+
     // 百鸟图鉴分页与筛选状态
     this.dexCategory = "all";
     this.dexKeyword = "";
@@ -85,8 +92,12 @@ class BirdQuizGame {
       totalBondsVal: document.getElementById("total-bonds-val"),
       bondsCountTab: document.getElementById("bonds-count-tab"),
 
-      // 模式与分类选择器
+      // 模式、难度与区域分类选择器
       poolSelector: document.getElementById("pool-selector"),
+      difficultySelector: document.getElementById("difficulty-selector"),
+      regionSelector: document.getElementById("region-selector"),
+      provinceSelect: document.getElementById("province-select"),
+      poolCountBadge: document.getElementById("pool-count-badge"),
       modeSelector: document.getElementById("mode-selector"),
 
       // 顶部指标
@@ -180,6 +191,7 @@ class BirdQuizGame {
     this.bindEvents();
     this.renderBirdDex();
     this.updateTrainerStatusUI();
+    this.updatePoolCountBadge();
 
     // 启动训练家体力实时恢复计时器
     setInterval(() => {
@@ -196,7 +208,7 @@ class BirdQuizGame {
       });
     }
 
-    // 题库生境分类切换
+    // 1. 题库生境分类切换
     if (this.dom.poolSelector) {
       this.dom.poolSelector.addEventListener("click", (e) => {
         const chip = e.target.closest(".config-chip");
@@ -207,11 +219,84 @@ class BirdQuizGame {
           chip.classList.add("active");
           this.selectedPool = chip.dataset.pool || "all";
           if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
+          this.updatePoolCountBadge();
         }
       });
     }
 
-    // 挑战模式切换
+    // 2. 识别难度分级切换 (简单前20% / 普通前50% / 困难全量)
+    if (this.dom.difficultySelector) {
+      this.dom.difficultySelector.addEventListener("click", (e) => {
+        const chip = e.target.closest(".config-chip");
+        if (chip) {
+          this.dom.difficultySelector
+            .querySelectorAll(".config-chip")
+            .forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          this.selectedDifficulty = chip.dataset.difficulty || "hard";
+          if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
+          this.updatePoolCountBadge();
+        }
+      });
+    }
+
+    // 3. 地理区域快捷切换 (8 大地理大区)
+    if (this.dom.regionSelector) {
+      this.dom.regionSelector.addEventListener("click", (e) => {
+        const chip = e.target.closest(".config-chip");
+        if (chip) {
+          this.dom.regionSelector
+            .querySelectorAll(".config-chip")
+            .forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          this.selectedRegion = chip.dataset.region || "all";
+
+          // 若切换大区且之前选了某省份，检查省份是否仍属于该大区，不属于则重置为全部
+          if (this.dom.provinceSelect) {
+            if (this.selectedRegion === "all") {
+              this.dom.provinceSelect.value = "all";
+              this.selectedProvince = "all";
+            } else {
+              const curProv = this.dom.provinceSelect.value;
+              const expectedReg = window.PROVINCE_TO_REGION ? window.PROVINCE_TO_REGION[curProv] : null;
+              if (expectedReg !== this.selectedRegion) {
+                this.dom.provinceSelect.value = "all";
+                this.selectedProvince = "all";
+              }
+            }
+          }
+
+          if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
+          this.updatePoolCountBadge();
+        }
+      });
+    }
+
+    // 4. 省级行政区细化下拉选单
+    if (this.dom.provinceSelect) {
+      this.dom.provinceSelect.addEventListener("change", (e) => {
+        this.selectedProvince = e.target.value;
+        if (this.selectedProvince !== "all" && window.PROVINCE_TO_REGION) {
+          const mappedRegion = window.PROVINCE_TO_REGION[this.selectedProvince];
+          if (mappedRegion && this.dom.regionSelector) {
+            this.selectedRegion = mappedRegion;
+            this.dom.regionSelector
+              .querySelectorAll(".config-chip")
+              .forEach((c) => {
+                if (c.dataset.region === mappedRegion) {
+                  c.classList.add("active");
+                } else {
+                  c.classList.remove("active");
+                }
+              });
+          }
+        }
+        if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
+        this.updatePoolCountBadge();
+      });
+    }
+
+    // 5. 挑战模式切换
     if (this.dom.modeSelector) {
       this.dom.modeSelector.addEventListener("click", (e) => {
         const chip = e.target.closest(".config-chip");
@@ -465,14 +550,26 @@ class BirdQuizGame {
     if (this.dom.bondsCountTab) this.dom.bondsCountTab.textContent = stats.totalBonds;
   }
 
+  // 实时更新题库匹配鸟类数量徽章
+  updatePoolCountBadge() {
+    if (!this.dom.poolCountBadge) return;
+    const birds = this.getPoolBirds();
+    this.dom.poolCountBadge.textContent = `🎯 当前匹配: ${birds.length} 种`;
+  }
+
   /**
-   * 根据用户选择获取当前激活的题库鸟类
+   * 根据用户选择的 生境、难度 (简单前20%/普通前50%/困难全部) 与 地理区域/省级行政区 获取题库鸟类
    */
   getPoolBirds() {
     const allBirds = Array.isArray(BIRDS_500_DATA) ? BIRDS_500_DATA : [];
-    if (this.selectedPool === "forest") {
-      return allBirds.filter((b) => {
-        return (
+    const total = allBirds.length;
+    const easyLimit = Math.ceil(total * 0.20);
+    const normalLimit = Math.ceil(total * 0.50);
+
+    const filtered = allBirds.filter((b) => {
+      // 1. 生境分类过滤
+      if (this.selectedPool === "forest") {
+        const isForest =
           b.category === "鸣禽" ||
           b.category === "攀禽" ||
           b.category === "陆禽" ||
@@ -481,12 +578,10 @@ class BirdQuizGame {
               (!b.habitat.includes("湿地") &&
                 !b.habitat.includes("水") &&
                 !b.habitat.includes("湖") &&
-                !b.habitat.includes("滩"))))
-        );
-      });
-    } else if (this.selectedPool === "water") {
-      return allBirds.filter((b) => {
-        return (
+                !b.habitat.includes("滩"))));
+        if (!isForest) return false;
+      } else if (this.selectedPool === "water") {
+        const isWater =
           b.category === "游禽" ||
           b.category === "涉禽" ||
           (b.habitat &&
@@ -496,11 +591,58 @@ class BirdQuizGame {
               b.habitat.includes("湿地") ||
               b.habitat.includes("海") ||
               b.habitat.includes("滩") ||
-              b.habitat.includes("库")))
-        );
-      });
+              b.habitat.includes("库")));
+        if (!isWater) return false;
+      }
+
+      // 2. 识别难度分级过滤 (简单: 前20%, 普通: 前50%, 困难: 全部100%)
+      if (this.selectedDifficulty === "easy") {
+        const isEasy = (b.commonRank && b.commonRank <= easyLimit) || b.commonTier === "easy";
+        if (!isEasy) return false;
+      } else if (this.selectedDifficulty === "normal") {
+        const isNormal = (b.commonRank && b.commonRank <= normalLimit) || b.commonTier !== "hard";
+        if (!isNormal) return false;
+      }
+
+      // 3. 区域与省级行政区过滤
+      if (this.selectedProvince && this.selectedProvince !== "all") {
+        const provMatch =
+          Array.isArray(b.provinces) &&
+          (b.provinces.includes("全国") || b.provinces.includes(this.selectedProvince));
+        if (!provMatch) return false;
+      } else if (this.selectedRegion && this.selectedRegion !== "all") {
+        const regMatch =
+          Array.isArray(b.regions) &&
+          (b.regions.includes("all") || b.regions.includes(this.selectedRegion));
+        if (!regMatch) return false;
+      }
+
+      return true;
+    });
+
+    // 兜底保障：若筛选后鸟类 >= 4 种则直接返回
+    if (filtered.length >= 4) {
+      return filtered;
     }
-    return allBirds;
+
+    // 若筛选条件过于苛刻导致可用物种 < 4 种，按省份适当放宽保障出题
+    const relaxed = allBirds.filter((b) => {
+      if (this.selectedProvince && this.selectedProvince !== "all") {
+        return (
+          Array.isArray(b.provinces) &&
+          (b.provinces.includes("全国") || b.provinces.includes(this.selectedProvince))
+        );
+      }
+      if (this.selectedRegion && this.selectedRegion !== "all") {
+        return (
+          Array.isArray(b.regions) &&
+          (b.regions.includes("all") || b.regions.includes(this.selectedRegion))
+        );
+      }
+      return true;
+    });
+
+    return relaxed.length >= 4 ? relaxed : allBirds;
   }
 
   /**
@@ -1321,19 +1463,41 @@ class BirdQuizGame {
           : "0.0";
 
       const poolLabelMap = {
-        all: "全部鸟类 (500种)",
+        all: "全部生境",
         forest: "林鸟题库",
         water: "水鸟题库"
       };
-      const poolName = poolLabelMap[this.selectedPool] || "全部鸟类";
+      const diffLabelMap = {
+        easy: "简单(前20%)",
+        normal: "普通(前50%)",
+        hard: "困难(全量)"
+      };
+      const regLabelMap = {
+        all: "全国",
+        north: "华北",
+        northeast: "东北",
+        east: "华东",
+        central: "华中",
+        south: "华南",
+        southwest: "西南",
+        northwest: "西北"
+      };
+
+      const poolName = poolLabelMap[this.selectedPool] || "全部生境";
+      const diffName = diffLabelMap[this.selectedDifficulty] || "困难";
+      const areaName =
+        this.selectedProvince && this.selectedProvince !== "all"
+          ? `${this.selectedProvince}`
+          : regLabelMap[this.selectedRegion] || "全国";
+      const fullMetaBadge = `${areaName} · ${diffName} · ${poolName}`;
 
       if (this.dom.summaryModeBadge) {
         if (this.gameMode === "classic") {
-          this.dom.summaryModeBadge.textContent = `🎯 经典 10 题挑战 · ${poolName}`;
+          this.dom.summaryModeBadge.textContent = `🎯 经典 10 题挑战 · ${fullMetaBadge}`;
         } else if (this.gameMode === "pokemon") {
-          this.dom.summaryModeBadge.textContent = `⚡ 宝可梦大师挑战 · ${poolName}`;
+          this.dom.summaryModeBadge.textContent = `⚡ 宝可梦大师挑战 · ${fullMetaBadge}`;
         } else {
-          this.dom.summaryModeBadge.textContent = `♾️ 无尽生存挑战 · ${poolName}`;
+          this.dom.summaryModeBadge.textContent = `♾️ 无尽生存挑战 · ${fullMetaBadge}`;
         }
       }
 
@@ -1707,14 +1871,24 @@ class BirdQuizGame {
       const item = document.createElement("div");
       item.className = "dex-card" + (hasAudio ? " has-audio" : "");
 
+      const diffTag = bird.commonTier === "easy"
+        ? `<span style="color:#34d399; font-weight:700; font-size:11px;">🌱 简单(前20%)</span>`
+        : (bird.commonTier === "normal"
+          ? `<span style="color:#38bdf8; font-weight:700; font-size:11px;">🌿 普通(前50%)</span>`
+          : `<span style="color:#f59e0b; font-weight:700; font-size:11px;">🦅 困难(全量)</span>`);
+
+      const provText = Array.isArray(bird.provinces) && bird.provinces.length > 0
+        ? (bird.provinces.includes("全国") ? "全国分布" : bird.provinces.slice(0, 4).join("、") + (bird.provinces.length > 4 ? "等" : ""))
+        : (bird.habitat || "全国分布");
+
       item.innerHTML = `
         <div class="dex-card-top">
           <span class="dex-index">#${String(globalIdx).padStart(3, "0")}</span>
           <span class="dex-family">${bird.orderFamily || bird.family || bird.category}</span>
         </div>
         <h4 class="dex-name">${bird.name}</h4>
-        <div class="dex-latin">${bird.latin}</div>
-        <div class="dex-category">${bird.category} · ${bird.habitat || "全国分布"}</div>
+        <div class="dex-latin">${bird.latin} · ${diffTag}</div>
+        <div class="dex-category">${bird.category} · 📍 ${provText}</div>
         ${
           hasAudio
             ? `<button class="dex-audio-btn">🔊 试听原声</button>`
