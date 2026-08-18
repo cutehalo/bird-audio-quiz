@@ -125,6 +125,24 @@ class BirdQuizGame {
       propDoubleBtn: document.getElementById("prop-double-btn"),
       propDoubleCount: document.getElementById("prop-double-count"),
 
+      // 宝可梦精灵球操作栏
+      pokeballBagVal: document.getElementById("pokeball-bag-val"),
+      pokeballActionBar: document.getElementById("pokeball-action-bar"),
+      pokeballTargetRarity: document.getElementById("pokeball-target-rarity"),
+      useNormalBallBtn: document.getElementById("use-normal-ball-btn"),
+      useGreatBallBtn: document.getElementById("use-great-ball-btn"),
+      useMasterBallBtn: document.getElementById("use-master-ball-btn"),
+      countNormalBall: document.getElementById("count-normal-ball"),
+      countGreatBall: document.getElementById("count-great-ball"),
+      countMasterBall: document.getElementById("count-master-ball"),
+      chanceNormalBall: document.getElementById("chance-normal-ball"),
+      chanceGreatBall: document.getElementById("chance-great-ball"),
+      chanceMasterBall: document.getElementById("chance-master-ball"),
+      summaryPokeballReward: document.getElementById("summary-pokeball-reward"),
+      rewardPokeballIcon: document.getElementById("reward-pokeball-icon"),
+      rewardPokeballTitle: document.getElementById("reward-pokeball-title"),
+      rewardPokeballDesc: document.getElementById("reward-pokeball-desc"),
+
       // 声音控制器与可视化
       playAudioBtn: document.getElementById("play-audio-btn"),
       audioStatusText: document.getElementById("audio-status-text"),
@@ -345,6 +363,23 @@ class BirdQuizGame {
       });
     }
 
+    // 宝可梦精灵球投掷操作
+    if (this.dom.useNormalBallBtn) {
+      this.dom.useNormalBallBtn.addEventListener("click", () => {
+        this.usePokeBall("normal");
+      });
+    }
+    if (this.dom.useGreatBallBtn) {
+      this.dom.useGreatBallBtn.addEventListener("click", () => {
+        this.usePokeBall("great");
+      });
+    }
+    if (this.dom.useMasterBallBtn) {
+      this.dom.useMasterBallBtn.addEventListener("click", () => {
+        this.usePokeBall("master");
+      });
+    }
+
     // 播放/重播当前鸟声
     this.dom.playAudioBtn.addEventListener("click", () => {
       if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
@@ -549,6 +584,9 @@ class BirdQuizGame {
     if (this.dom.totalCollectedVal) this.dom.totalCollectedVal.textContent = `${stats.totalCollected} / 500`;
     if (this.dom.totalBondsVal) this.dom.totalBondsVal.textContent = `${stats.totalBonds} 科`;
     if (this.dom.bondsCountTab) this.dom.bondsCountTab.textContent = stats.totalBonds;
+    if (this.dom.pokeballBagVal && stats.pokeBalls) {
+      this.dom.pokeballBagVal.textContent = `🔴${stats.pokeBalls.normal} 🔵${stats.pokeBalls.great} 🟣${stats.pokeBalls.master}`;
+    }
   }
 
   // 实时更新题库匹配鸟类数量徽章
@@ -958,6 +996,92 @@ class BirdQuizGame {
     }
   }
 
+  // 更新宝可梦精灵球操作栏与针对当前鸟类的捕获概率
+  updatePokeBallActionBarUI() {
+    if (!this.dom.pokeballActionBar) return;
+
+    if (this.gameMode !== "pokemon" || !window.birdPokemonSystem) {
+      this.dom.pokeballActionBar.style.display = "none";
+      return;
+    }
+
+    this.dom.pokeballActionBar.style.display = "flex";
+    const currentQ = this.questions[this.currentRound];
+    if (!currentQ) return;
+
+    const bird = currentQ.bird;
+    const rarity = window.getBirdRarityIndex ? window.getBirdRarityIndex(bird) : 5.0;
+    const coef = window.getRarityCoefficient ? window.getRarityCoefficient(rarity) : 1.0;
+
+    if (this.dom.pokeballTargetRarity) {
+      this.dom.pokeballTargetRarity.textContent = `💎 稀有指数: ${rarity} (系数: ${coef})`;
+    }
+
+    const counts = window.birdPokemonSystem.getPokeBallCounts();
+    const rateNormal = window.calculateCatchRate ? window.calculateCatchRate("normal", bird) : { percentText: "10%" };
+    const rateGreat = window.calculateCatchRate ? window.calculateCatchRate("great", bird) : { percentText: "20%" };
+    const rateMaster = window.calculateCatchRate ? window.calculateCatchRate("master", bird) : { percentText: "30%" };
+
+    if (this.dom.countNormalBall) this.dom.countNormalBall.textContent = counts.normal;
+    if (this.dom.countGreatBall) this.dom.countGreatBall.textContent = counts.great;
+    if (this.dom.countMasterBall) this.dom.countMasterBall.textContent = counts.master;
+
+    if (this.dom.chanceNormalBall) this.dom.chanceNormalBall.textContent = `捕获率: ${rateNormal.percentText}`;
+    if (this.dom.chanceGreatBall) this.dom.chanceGreatBall.textContent = `捕获率: ${rateGreat.percentText}`;
+    if (this.dom.chanceMasterBall) this.dom.chanceMasterBall.textContent = `捕获率: ${rateMaster.percentText}`;
+
+    if (this.dom.useNormalBallBtn) this.dom.useNormalBallBtn.disabled = this.isAnswered || counts.normal <= 0;
+    if (this.dom.useGreatBallBtn) this.dom.useGreatBallBtn.disabled = this.isAnswered || counts.great <= 0;
+    if (this.dom.useMasterBallBtn) this.dom.useMasterBallBtn.disabled = this.isAnswered || counts.master <= 0;
+  }
+
+  // 使用精灵球：直接正确作答 + 概率捕获提升 1 星 (满 3 星自动返还)
+  usePokeBall(ballType) {
+    if (this.isAnswered) return;
+    if (!window.birdPokemonSystem) return;
+
+    const currentQ = this.questions[this.currentRound];
+    if (!currentQ) return;
+
+    const captureResult = window.birdPokemonSystem.attemptCapture(ballType, currentQ.bird);
+    if (captureResult.error === "no_ball") {
+      if (window.birdAudioEngine) window.birdAudioEngine.playErrorSfx();
+      alert(captureResult.message);
+      return;
+    }
+
+    if (window.birdAudioEngine) {
+      window.birdAudioEngine.playPropSfx();
+    }
+
+    // 1. 直接触发正确作答当前题目
+    this.handleAnswer(currentQ.correctAnswer);
+
+    // 2. 注入捕获特效与详细反馈
+    if (this.dom.pokemonFeedbackContainer) {
+      const badgeColor = captureResult.success ? "var(--emerald-400)" : "var(--amber-400)";
+      const icon = captureResult.success ? "🌟" : "💨";
+      const captureHtml = `
+        <div class="pokemon-star-levelup" style="margin-top: 10px; padding: 12px 16px; background: rgba(15,23,42,0.85); border: 1px solid ${badgeColor}; border-radius: 8px;">
+          <div style="font-size: 15px; font-weight: 800; color: ${badgeColor};">
+            ${icon} ${captureResult.message}
+          </div>
+          ${captureResult.rateInfo ? `<div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">懂鸟稀有指数: ${captureResult.rateInfo.rarityIndex} (修正系数: ${captureResult.rateInfo.coefficient}) · 实际捕获率: ${captureResult.rateInfo.percentText}</div>` : ""}
+        </div>
+      `;
+      this.dom.pokemonFeedbackContainer.innerHTML += captureHtml;
+    }
+
+    if (captureResult.success) {
+      if (window.birdAudioEngine) {
+        window.birdAudioEngine.playBonusSfx();
+      }
+    }
+
+    this.updateTrainerStatusUI();
+    this.updatePokeBallActionBarUI();
+  }
+
   // 切换屏幕视图
   showScreen(screenKey) {
     ["startScreen", "quizScreen", "summaryScreen"].forEach((k) => {
@@ -1008,6 +1132,7 @@ class BirdQuizGame {
     this.updateLivesUI();
     this.updatePropsUI();
     this.updateBonusBannerUI();
+    this.updatePokeBallActionBarUI();
 
     // 宝可梦模式专属遭遇横幅 (答题前保持神秘，避免泄露鸟名答案)
     if (this.gameMode === "pokemon" && window.birdPokemonSystem) {
@@ -1139,6 +1264,7 @@ class BirdQuizGame {
     this.isAnswered = true;
     this.clearTimer();
     this.updatePropsUI();
+    this.updatePokeBallActionBarUI();
 
     const currentQ = this.questions[this.currentRound];
     const duration = this.questionStartTime
@@ -1175,7 +1301,17 @@ class BirdQuizGame {
 
       const streakText = this.streak >= 2 ? ` 🔥${this.streak}` : "";
       this.dom.scoreIndicator.textContent = `得分: ${this.score}${streakText}`;
-      clickedBtn.classList.add("correct");
+      
+      if (clickedBtn) {
+        clickedBtn.classList.add("correct");
+      } else {
+        allButtons.forEach((b) => {
+          const textEl = b.querySelector(".option-text");
+          if (textEl && textEl.textContent.trim() === currentQ.correctAnswer) {
+            b.classList.add("correct");
+          }
+        });
+      }
 
       // 宝可梦模式累计熟练度与星级
       if (this.gameMode === "pokemon" && window.birdPokemonSystem) {
@@ -1610,6 +1746,45 @@ class BirdQuizGame {
         }
       }
 
+      // 挑战结算精灵球奖励 (每满 100 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
+      const earnedBallsCount = Math.floor(this.score / 100);
+      const ballTypeByDiff =
+        this.selectedDifficulty === "easy"
+          ? "normal"
+          : this.selectedDifficulty === "normal"
+          ? "great"
+          : "master";
+
+      const ballNameMap = {
+        normal: "普通精灵球 🔴",
+        great: "高级球 🔵",
+        master: "大师球 🟣"
+      };
+      const ballIconMap = {
+        normal: "🔴",
+        great: "🔵",
+        master: "🟣"
+      };
+
+      if (this.dom.summaryPokeballReward) {
+        if (earnedBallsCount > 0 && window.birdPokemonSystem) {
+          window.birdPokemonSystem.addPokeBalls(ballTypeByDiff, earnedBallsCount);
+          this.dom.summaryPokeballReward.style.display = "flex";
+          if (this.dom.rewardPokeballIcon) {
+            this.dom.rewardPokeballIcon.textContent = ballIconMap[ballTypeByDiff];
+          }
+          if (this.dom.rewardPokeballTitle) {
+            this.dom.rewardPokeballTitle.textContent = `🎁 结算奖励：获得 ${earnedBallsCount} 个【${ballNameMap[ballTypeByDiff]}】！`;
+          }
+          if (this.dom.rewardPokeballDesc) {
+            this.dom.rewardPokeballDesc.textContent = `当局斩获 ${this.score} 分（每满 100 分获 1 球）· ${diffName}题库奖励 · 已自动存入精灵球背包！`;
+          }
+          this.updateTrainerStatusUI();
+        } else {
+          this.dom.summaryPokeballReward.style.display = "none";
+        }
+      }
+
       this.renderReviewList();
     } catch (err) {
       console.error("renderSummary error:", err);
@@ -1750,7 +1925,7 @@ class BirdQuizGame {
           <span style="font-size:11px; color:var(--text-dim);">${bird.category}</span>
         </div>
         <div class="pokemon-card-name">${bird.name}</div>
-        <div class="pokemon-card-latin">${bird.latin} · ${bird.orderFamily || ""}</div>
+        <div class="pokemon-card-latin">${bird.latin} · <span style="color:var(--emerald-400); font-weight:700;">💎 稀有: ${bird.rarityIndex || 5.0}</span> · ${bird.orderFamily || ""}</div>
 
         <div class="exp-section">
           <div class="exp-label-row">
@@ -1900,7 +2075,7 @@ class BirdQuizGame {
           <span class="dex-family">${bird.orderFamily || bird.family || bird.category}</span>
         </div>
         <h4 class="dex-name">${bird.name}</h4>
-        <div class="dex-latin">${bird.latin} · ${diffTag}</div>
+        <div class="dex-latin">${bird.latin} · ${diffTag} · <span style="color:var(--amber-300); font-weight:700; font-size:11px;">💎 稀有: ${bird.rarityIndex || 5.0}</span></div>
         <div class="dex-category">${bird.category} · 📍 ${provText}</div>
         ${
           hasAudio

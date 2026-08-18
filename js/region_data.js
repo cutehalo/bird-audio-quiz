@@ -164,20 +164,102 @@ function enrichAllBirdsData() {
     }
   });
 
-  // 按常见度升序排列，并精确重赋予 1 ~ 500 排名与 Tier
+  // 按常见度升序排列，并精确重赋予 1 ~ 500 排名、Tier 与科学懂鸟稀有指数 (1.0 ~ 9.8)
   birds.sort((a, b) => a.commonRank - b.commonRank);
   birds.forEach((bird, idx) => {
     bird.commonRank = idx + 1;
     if (idx < easyCount) {
       bird.commonTier = "easy";
+      // 简单前 20% (1-100 种): 稀有指数 1.2 ~ 4.8 (系数 1.0)
+      bird.rarityIndex = parseFloat((1.2 + (idx / easyCount) * 3.6).toFixed(1));
     } else if (idx < normalCount) {
       bird.commonTier = "normal";
+      // 普通前 50% (101-250 种): 稀有指数 5.0 ~ 6.9 (系数 0.7)
+      const normalOffset = idx - easyCount;
+      const normalSpan = normalCount - easyCount;
+      bird.rarityIndex = parseFloat((5.0 + (normalOffset / normalSpan) * 1.9).toFixed(1));
     } else {
       bird.commonTier = "hard";
+      const hardOffset = idx - normalCount;
+      const hardSpan = total - normalCount;
+      // 困难 (251-500 种): 细分为 7.0~7.9 (50%), 8.0~8.9 (35%), 9.0~9.8 (15%)
+      if (hardOffset < hardSpan * 0.50) {
+        bird.rarityIndex = parseFloat((7.0 + (hardOffset / (hardSpan * 0.50)) * 0.9).toFixed(1));
+      } else if (hardOffset < hardSpan * 0.85) {
+        const span2 = hardSpan * 0.35;
+        const off2 = hardOffset - hardSpan * 0.50;
+        bird.rarityIndex = parseFloat((8.0 + (off2 / span2) * 0.9).toFixed(1));
+      } else {
+        const span3 = hardSpan * 0.15;
+        const off3 = hardOffset - hardSpan * 0.85;
+        bird.rarityIndex = parseFloat((9.0 + (off3 / span3) * 0.8).toFixed(1));
+      }
+    }
+
+    // 重点特有及国家极危珍禽保底高稀有指数 (>= 9.0)
+    const CRITICAL_RARE_NAMES = [
+      "中华凤头燕鸥", "勺嘴鹬", "黑脸琵鹭", "中华秋沙鸭", "海南鳽", "白鹤", "青头潜鸭", "绿孔雀",
+      "白颈长尾雉", "黄腹角雉", "朱鹮", "东方白鹳", "黑鹳", "丹顶鹤", "白头鹤", "黑颈鹤", "大鸨",
+      "白肩雕", "玉带海雕", "白尾海雕", "虎头海雕", "金雕", "胡兀鹫", "绿尾虹雉", "白马鸡", "红腹角雉"
+    ];
+    if (CRITICAL_RARE_NAMES.includes(bird.name)) {
+      bird.rarityIndex = Math.max(bird.rarityIndex, 9.2);
     }
   });
 
-  console.log(`[RegionData] 成功为 ${birds.length} 种鸟类注入难度分级与中国省级分布数据！(简单: 1-${easyCount}, 普通: 1-${normalCount}, 困难: 1-${total})`);
+  console.log(`[RegionData] 成功为 ${birds.length} 种鸟类注入难度分级、懂鸟稀有指数与中国省级分布数据！(简单: 1-${easyCount}, 普通: 1-${normalCount}, 困难: 1-${total})`);
+}
+
+/**
+ * 获取鸟类的懂鸟稀有指数 (1.0 ~ 9.8)
+ */
+function getBirdRarityIndex(bird) {
+  if (!bird) return 5.0;
+  if (typeof bird.rarityIndex === "number") return bird.rarityIndex;
+  return 5.0;
+}
+
+/**
+ * 根据懂鸟稀有指数获取捕获概率系数 K:
+ * R < 5: K = 1.0
+ * 5 <= R < 7: K = 0.7
+ * 7 <= R < 8: K = 0.5
+ * 8 <= R < 9: K = 0.3
+ * R >= 9: K = 0.2
+ */
+function getRarityCoefficient(rarityIndex) {
+  const r = typeof rarityIndex === "number" ? rarityIndex : 5.0;
+  if (r < 5.0) return 1.0;
+  if (r < 7.0) return 0.7;
+  if (r < 8.0) return 0.5;
+  if (r < 9.0) return 0.3;
+  return 0.2;
+}
+
+/**
+ * 计算三种精灵球对目标鸟类的捕获概率
+ * 普通球 base = 0.10, 高级球 base = 0.20, 大师球 base = 0.30
+ */
+function calculateCatchRate(ballType, bird) {
+  const baseRates = {
+    normal: 0.10,
+    great: 0.20,
+    master: 0.30
+  };
+  const base = baseRates[ballType] || 0.10;
+  const rarity = getBirdRarityIndex(bird);
+  const k = getRarityCoefficient(rarity);
+  const finalRate = base * k;
+  const percentText = `${Math.round(finalRate * 100)}%`;
+
+  return {
+    ballType,
+    baseRate: base,
+    rarityIndex: rarity,
+    coefficient: k,
+    finalRate,
+    percentText
+  };
 }
 
 // 导出全局对象
@@ -185,6 +267,9 @@ window.CHINA_REGIONS = CHINA_REGIONS;
 window.ALL_PROVINCES = ALL_PROVINCES;
 window.PROVINCE_TO_REGION = PROVINCE_TO_REGION;
 window.enrichAllBirdsData = enrichAllBirdsData;
+window.getBirdRarityIndex = getBirdRarityIndex;
+window.getRarityCoefficient = getRarityCoefficient;
+window.calculateCatchRate = calculateCatchRate;
 
 // 自动执行一次富化
 if (typeof BIRDS_500_DATA !== "undefined") {
