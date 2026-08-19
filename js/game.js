@@ -786,6 +786,12 @@ class BirdQuizGame {
       this.questions.push(this.createSingleQuestion(firstTarget, poolBirds));
     }
 
+    // 启动音频流水线预加载，实现首题和后续题目的秒开
+    if (window.birdAudioEngine && this.questions.length > 0) {
+      const initialBirds = this.questions.slice(0, 3).map((q) => q.bird);
+      window.birdAudioEngine.preloadBirds(initialBirds);
+    }
+
     this.showScreen("quizScreen");
     this.updateLivesUI();
     this.loadQuestion(0);
@@ -1179,6 +1185,12 @@ class BirdQuizGame {
     // 自动播放鸟鸣音频
     if (window.birdAudioEngine) {
       window.birdAudioEngine.playBird(currentQ.bird);
+
+      // 静默预加载后续 2 题音频，实现 0ms 瞬时无缝切题
+      if (this.questions.length > index + 1) {
+        const upcomingBirds = this.questions.slice(index + 1, index + 3).map((q) => q.bird);
+        window.birdAudioEngine.preloadBirds(upcomingBirds);
+      }
     }
   }
 
@@ -1560,7 +1572,11 @@ class BirdQuizGame {
             this.poolIndex = 0;
           }
           const nextTarget = this.shuffledPool[this.poolIndex++];
-          this.questions.push(this.createSingleQuestion(nextTarget, poolBirds));
+          const newQ = this.createSingleQuestion(nextTarget, poolBirds);
+          this.questions.push(newQ);
+          if (window.birdAudioEngine) {
+            window.birdAudioEngine.preloadBirds([newQ.bird]);
+          }
         }
         this.loadQuestion(nextIndex);
       }

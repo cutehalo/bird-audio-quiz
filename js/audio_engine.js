@@ -14,6 +14,8 @@ class AudioEngine {
 
     // 原生音频播放器（不设 crossOrigin，确保 file:/// 本地文件秒开播放）
     this.audioElement = new Audio();
+    this.audioElement.preload = "auto";
+    this.preloadCache = new Map();
     this.isPlaying = false;
     this.currentBird = null;
     this.currentUrlIndex = 0;
@@ -114,6 +116,29 @@ class AudioEngine {
     this.canvas = canvasElement;
     this.canvasCtx = canvasElement.getContext("2d");
     this.startVisualizer();
+  }
+
+  // 预拉取指定 URL 的音频流并缓存在内存中
+  preloadAudio(url) {
+    if (!url || this.preloadCache.has(url)) return;
+    try {
+      const audio = new Audio();
+      audio.preload = "auto";
+      audio.src = url;
+      this.preloadCache.set(url, audio);
+    } catch (e) {
+      console.warn("Preload audio error:", e);
+    }
+  }
+
+  // 批量静默预拉取多只鸟类的音频
+  preloadBirds(birds) {
+    if (!Array.isArray(birds)) return;
+    birds.forEach((bird) => {
+      if (bird && Array.isArray(bird.audioUrls) && bird.audioUrls[0]) {
+        this.preloadAudio(bird.audioUrls[0]);
+      }
+    });
   }
 
   // 播放鸟类真实录音
