@@ -118,6 +118,7 @@ class BirdQuizGame {
       encounterBondTag: document.getElementById("encounter-bond-tag"),
 
       // 道具栏
+      propsToolbar: document.getElementById("props-toolbar"),
       propRemoveBtn: document.getElementById("prop-remove-btn"),
       propRemoveCount: document.getElementById("prop-remove-count"),
       propTimeBtn: document.getElementById("prop-time-btn"),
@@ -807,6 +808,16 @@ class BirdQuizGame {
 
   // 更新道具操作栏状态
   updatePropsUI() {
+    if (!this.dom.propsToolbar) return;
+
+    if (this.gameMode === "classic") {
+      // 普通/经典模式：去除道具，完全隐藏道具操作栏，保持纯粹的听音答题测试
+      this.dom.propsToolbar.style.display = "none";
+      return;
+    }
+
+    this.dom.propsToolbar.style.display = "grid";
+
     if (this.gameMode === "pokemon") {
       // 宝可梦模式：使用当前积分兑换道具 (初始 20 分，使用一次后翻倍)
       if (this.dom.propRemoveCount) {
@@ -843,7 +854,7 @@ class BirdQuizGame {
         }
       }
     } else {
-      // 经典模式与无尽模式：固定每局各 3 个
+      // 无尽生存模式：固定每局各 3 个辅助冲榜
       if (this.dom.propRemoveCount) {
         this.dom.propRemoveCount.className = "prop-badge";
         this.dom.propRemoveCount.textContent = `x${this.props.remove}`;
@@ -882,7 +893,7 @@ class BirdQuizGame {
 
   // 道具 1：排除 2 个错误答案
   useRemoveProp() {
-    if (this.isAnswered || this.usedRemoveThisRound) return;
+    if (this.gameMode === "classic" || this.isAnswered || this.usedRemoveThisRound) return;
 
     if (this.gameMode === "pokemon") {
       const cost = this.pokemonPropCosts.remove;
@@ -918,7 +929,7 @@ class BirdQuizGame {
 
   // 道具 2：延长时间至 60 秒
   useTimeProp() {
-    if (this.isAnswered || this.usedTimeThisRound) return;
+    if (this.gameMode === "classic" || this.isAnswered || this.usedTimeThisRound) return;
 
     if (this.gameMode === "pokemon") {
       const cost = this.pokemonPropCosts.time;
@@ -945,7 +956,7 @@ class BirdQuizGame {
 
   // 道具 3：双倍计分
   useDoubleProp() {
-    if (this.isAnswered || this.usedDoubleThisRound) return;
+    if (this.gameMode === "classic" || this.isAnswered || this.usedDoubleThisRound) return;
 
     if (this.gameMode === "pokemon") {
       const cost = this.pokemonPropCosts.double;
