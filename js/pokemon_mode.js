@@ -152,7 +152,7 @@ class BirdPokemonSystem {
     };
   }
 
-  // 获得精灵球奖励 (每100积分获得1个，按难度分普通/高级/大师)
+  // 获得精灵球奖励 (每50积分获得1个，按难度分普通/高级/大师)
   addPokeBalls(ballType, count = 1) {
     if (count <= 0) return 0;
     if (!this.data.pokeBalls) {

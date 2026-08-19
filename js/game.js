@@ -1758,8 +1758,8 @@ class BirdQuizGame {
         }
       }
 
-      // 挑战结算精灵球奖励 (每满 100 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
-      const earnedBallsCount = Math.floor(this.score / 100);
+      // 挑战结算精灵球奖励 (每满 50 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
+      const earnedBallsCount = Math.floor(this.score / 50);
       const ballTypeByDiff =
         this.selectedDifficulty === "easy"
           ? "normal"
@@ -1789,7 +1789,7 @@ class BirdQuizGame {
             this.dom.rewardPokeballTitle.textContent = `🎁 结算奖励：获得 ${earnedBallsCount} 个【${ballNameMap[ballTypeByDiff]}】！`;
           }
           if (this.dom.rewardPokeballDesc) {
-            this.dom.rewardPokeballDesc.textContent = `当局斩获 ${this.score} 分（每满 100 分获 1 球）· ${diffName}题库奖励 · 已自动存入精灵球背包！`;
+            this.dom.rewardPokeballDesc.textContent = `当局斩获 ${this.score} 分（每满 50 分获 1 球）· ${diffName}题库奖励 · 已自动存入精灵球背包！`;
           }
           this.updateTrainerStatusUI();
         } else {
