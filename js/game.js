@@ -128,7 +128,6 @@ class BirdQuizGame {
       // 宝可梦精灵球操作栏
       pokeballBagVal: document.getElementById("pokeball-bag-val"),
       pokeballActionBar: document.getElementById("pokeball-action-bar"),
-      pokeballTargetRarity: document.getElementById("pokeball-target-rarity"),
       useNormalBallBtn: document.getElementById("use-normal-ball-btn"),
       useGreatBallBtn: document.getElementById("use-great-ball-btn"),
       useMasterBallBtn: document.getElementById("use-master-ball-btn"),
@@ -997,6 +996,7 @@ class BirdQuizGame {
   }
 
   // 更新宝可梦精灵球操作栏与针对当前鸟类的捕获概率
+  // 更新宝可梦精灵球操作栏与可用状态
   updatePokeBallActionBarUI() {
     if (!this.dom.pokeballActionBar) return;
 
@@ -1006,29 +1006,15 @@ class BirdQuizGame {
     }
 
     this.dom.pokeballActionBar.style.display = "flex";
-    const currentQ = this.questions[this.currentRound];
-    if (!currentQ) return;
-
-    const bird = currentQ.bird;
-    const rarity = window.getBirdRarityIndex ? window.getBirdRarityIndex(bird) : 5.0;
-    const coef = window.getRarityCoefficient ? window.getRarityCoefficient(rarity) : 1.0;
-
-    if (this.dom.pokeballTargetRarity) {
-      this.dom.pokeballTargetRarity.textContent = `💎 稀有指数: ${rarity} (系数: ${coef})`;
-    }
-
     const counts = window.birdPokemonSystem.getPokeBallCounts();
-    const rateNormal = window.calculateCatchRate ? window.calculateCatchRate("normal", bird) : { percentText: "10%" };
-    const rateGreat = window.calculateCatchRate ? window.calculateCatchRate("great", bird) : { percentText: "20%" };
-    const rateMaster = window.calculateCatchRate ? window.calculateCatchRate("master", bird) : { percentText: "30%" };
 
     if (this.dom.countNormalBall) this.dom.countNormalBall.textContent = counts.normal;
     if (this.dom.countGreatBall) this.dom.countGreatBall.textContent = counts.great;
     if (this.dom.countMasterBall) this.dom.countMasterBall.textContent = counts.master;
 
-    if (this.dom.chanceNormalBall) this.dom.chanceNormalBall.textContent = `捕获率: ${rateNormal.percentText}`;
-    if (this.dom.chanceGreatBall) this.dom.chanceGreatBall.textContent = `捕获率: ${rateGreat.percentText}`;
-    if (this.dom.chanceMasterBall) this.dom.chanceMasterBall.textContent = `捕获率: ${rateMaster.percentText}`;
+    if (this.dom.chanceNormalBall) this.dom.chanceNormalBall.textContent = "基础 10%";
+    if (this.dom.chanceGreatBall) this.dom.chanceGreatBall.textContent = "基础 20%";
+    if (this.dom.chanceMasterBall) this.dom.chanceMasterBall.textContent = "基础 30%";
 
     if (this.dom.useNormalBallBtn) this.dom.useNormalBallBtn.disabled = this.isAnswered || counts.normal <= 0;
     if (this.dom.useGreatBallBtn) this.dom.useGreatBallBtn.disabled = this.isAnswered || counts.great <= 0;
@@ -1057,7 +1043,7 @@ class BirdQuizGame {
     // 1. 直接触发正确作答当前题目
     this.handleAnswer(currentQ.correctAnswer);
 
-    // 2. 注入捕获特效与详细反馈
+    // 2. 注入捕获特效与详细反馈（不泄露稀有度指数）
     if (this.dom.pokemonFeedbackContainer) {
       const badgeColor = captureResult.success ? "var(--emerald-400)" : "var(--amber-400)";
       const icon = captureResult.success ? "🌟" : "💨";
@@ -1066,7 +1052,6 @@ class BirdQuizGame {
           <div style="font-size: 15px; font-weight: 800; color: ${badgeColor};">
             ${icon} ${captureResult.message}
           </div>
-          ${captureResult.rateInfo ? `<div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">懂鸟稀有指数: ${captureResult.rateInfo.rarityIndex} (修正系数: ${captureResult.rateInfo.coefficient}) · 实际捕获率: ${captureResult.rateInfo.percentText}</div>` : ""}
         </div>
       `;
       this.dom.pokemonFeedbackContainer.innerHTML += captureHtml;
