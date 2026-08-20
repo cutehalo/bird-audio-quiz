@@ -5,7 +5,7 @@
  * 支持：三大强力道具 (排除二错 / 延时60秒 / 双倍得分 各 3 个)
  * 支持：连续答对连胜倍率奖励 (3连胜 2倍 / 10连胜 4倍)
  * 支持：5 秒极速抢答奖励 (+5 分)
- * 支持：宝可梦体力系统 (每日5点，每3小时恢复1点)、指数熟练度星级收集与同科羁绊系统
+ * 支持：宝可梦体力系统 (每日10点，每1小时恢复1点)、指数熟练度星级收集与同科羁绊系统
  */
 
 class BirdQuizGame {
@@ -579,7 +579,7 @@ class BirdQuizGame {
 
     if (this.dom.trainerLevel) this.dom.trainerLevel.textContent = stats.trainerLevel;
     if (this.dom.trainerExp) this.dom.trainerExp.textContent = stats.trainerExp;
-    if (this.dom.staminaVal) this.dom.staminaVal.textContent = `${stats.stamina} / 5`;
+    if (this.dom.staminaVal) this.dom.staminaVal.textContent = `${stats.stamina} / ${stats.maxStamina || 10}`;
     if (this.dom.staminaCountdown) this.dom.staminaCountdown.textContent = timeInfo.text;
     if (this.dom.totalCollectedVal) this.dom.totalCollectedVal.textContent = `${stats.totalCollected} / 500`;
     if (this.dom.totalBondsVal) this.dom.totalBondsVal.textContent = `${stats.totalBonds} 科`;
@@ -743,8 +743,8 @@ class BirdQuizGame {
       if (!window.birdPokemonSystem || !window.birdPokemonSystem.consumeStamina()) {
         const timeInfo = window.birdPokemonSystem
           ? window.birdPokemonSystem.getTimeToNextStamina().text
-          : "3小时";
-        alert(`⚡ 体力不足！当前体力为 0 点。\n\n系统每 3 小时自动恢复 1 点体力（距离下次恢复还有 ${timeInfo}）。\n您可先体验【经典模式】或【无尽模式】！`);
+          : "1小时";
+        alert(`⚡ 体力不足！当前体力为 0 点。\n\n系统每 1 小时自动恢复 1 点体力（距离下次恢复还有 ${timeInfo}）。\n您可先体验【经典模式】或【无尽模式】！`);
         if (window.birdAudioEngine) window.birdAudioEngine.playErrorSfx();
         return;
       }

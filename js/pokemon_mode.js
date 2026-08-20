@@ -1,6 +1,6 @@
 /**
  * 听音识鸟 - 宝可梦模式核心系统 (PokemonSystem)
- * 1. 每日 5 点体力限制，少于 5 点时每 3 小时自动恢复 1 点
+ * 1. 每日 10 点体力限制，少于 10 点时每 1 小时自动恢复 1 点
  * 2. 熟练度与指数经验曲线收集：答对累计提升星级 (⭐ 1星 / ⭐⭐ 2星 / ⭐⭐⭐ 3星)
  * 3. 同目同科羁绊系统：科内收集 ≥ 5 张 1星卡激活羁绊卡，激活后升级所需答对次数减少至 3 次
  * 4. 全生涯数据持久化存储 (localStorage)
@@ -9,8 +9,8 @@
 class BirdPokemonSystem {
   constructor() {
     this.STORAGE_KEY = "bird_audio_pokemon_save_v1";
-    this.MAX_STAMINA = 5;
-    this.RECOVER_INTERVAL = 3 * 60 * 60 * 1000; // 3 小时恢复 1 点体力 (毫秒)
+    this.MAX_STAMINA = 10;
+    this.RECOVER_INTERVAL = 1 * 60 * 60 * 1000; // 1 小时恢复 1 点体力 (毫秒)
     this.BOND_THRESHOLD = 5; // 同科收集 5 张 1 星卡激活羁绊
 
     this.data = this.loadData();
@@ -20,7 +20,7 @@ class BirdPokemonSystem {
   // 加载持久化数据
   loadData() {
     const defaultData = {
-      stamina: 5,
+      stamina: 10,
       lastRecoverTimestamp: Date.now(),
       trainerExp: 0,
       trainerLevel: 1,
@@ -118,7 +118,7 @@ class BirdPokemonSystem {
   getTimeToNextStamina() {
     this.updateStamina();
     if (this.data.stamina >= this.MAX_STAMINA) {
-      return { ms: 0, text: "体力已满 (5/5)" };
+      return { ms: 0, text: `体力已满 (${this.MAX_STAMINA}/${this.MAX_STAMINA})` };
     }
 
     const now = Date.now();
@@ -518,6 +518,7 @@ class BirdPokemonSystem {
       trainerLevel: this.data.trainerLevel,
       trainerExp: this.data.trainerExp,
       stamina: this.getStamina(),
+      maxStamina: this.MAX_STAMINA,
       pokeBalls: this.getPokeBallCounts()
     };
   }
