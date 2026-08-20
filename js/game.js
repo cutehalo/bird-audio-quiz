@@ -23,16 +23,16 @@ class BirdQuizGame {
     this.streak = 0;
     this.maxStreak = 0;
 
-    // 道具系统 (经典/无尽每局各 3 个；宝可梦模式使用当前积分兑换，初始20分每次翻倍)
+    // 道具系统 (经典/无尽每局各 3 个；宝可梦模式使用当前积分兑换，初始10分每次递增10分)
     this.props = {
       remove: 3,
       time: 3,
       double: 3
     };
     this.pokemonPropCosts = {
-      remove: 20,
-      time: 20,
-      double: 20
+      remove: 10,
+      time: 10,
+      double: 10
     };
     this.usedRemoveThisRound = false;
     this.usedTimeThisRound = false;
@@ -758,16 +758,16 @@ class BirdQuizGame {
     this.maxStreak = 0;
     this.lives = this.maxLives;
 
-    // 重置道具库 (经典/无尽各 3 个；宝可梦模式初始每种 20 分，使用后翻倍)
+    // 重置道具库 (经典/无尽各 3 个；宝可梦模式初始每种 10 分，每使用一次后增加 10 分)
     this.props = {
       remove: 3,
       time: 3,
       double: 3
     };
     this.pokemonPropCosts = {
-      remove: 20,
-      time: 20,
-      double: 20
+      remove: 10,
+      time: 10,
+      double: 10
     };
 
     const poolBirds = this.getPoolBirds();
@@ -825,7 +825,7 @@ class BirdQuizGame {
     this.dom.propsToolbar.style.display = "grid";
 
     if (this.gameMode === "pokemon") {
-      // 宝可梦模式：使用当前积分兑换道具 (初始 20 分，使用一次后翻倍)
+      // 宝可梦模式：使用当前积分兑换道具 (初始 10 分，每使用一次后增加 10 分)
       if (this.dom.propRemoveCount) {
         this.dom.propRemoveCount.className = "prop-badge cost-badge";
         this.dom.propRemoveCount.textContent = `🪙 ${this.pokemonPropCosts.remove}分`;
@@ -840,17 +840,17 @@ class BirdQuizGame {
       }
 
       if (this.dom.propRemoveBtn) {
-        this.dom.propRemoveBtn.title = `消耗 ${this.pokemonPropCosts.remove} 积分排除 2 个错误干扰选项 (用后翻倍)`;
+        this.dom.propRemoveBtn.title = `消耗 ${this.pokemonPropCosts.remove} 积分排除 2 个错误干扰选项 (用后+10分)`;
         this.dom.propRemoveBtn.disabled =
           this.score < this.pokemonPropCosts.remove || this.usedRemoveThisRound || this.isAnswered;
       }
       if (this.dom.propTimeBtn) {
-        this.dom.propTimeBtn.title = `消耗 ${this.pokemonPropCosts.time} 积分将倒计时延至 60 秒 (用后翻倍)`;
+        this.dom.propTimeBtn.title = `消耗 ${this.pokemonPropCosts.time} 积分将倒计时延至 60 秒 (用后+10分)`;
         this.dom.propTimeBtn.disabled =
           this.score < this.pokemonPropCosts.time || this.usedTimeThisRound || this.isAnswered;
       }
       if (this.dom.propDoubleBtn) {
-        this.dom.propDoubleBtn.title = `消耗 ${this.pokemonPropCosts.double} 积分使本题基础得分直接翻倍 (用后翻倍)`;
+        this.dom.propDoubleBtn.title = `消耗 ${this.pokemonPropCosts.double} 积分使本题基础得分直接翻倍 (用后+10分)`;
         this.dom.propDoubleBtn.disabled =
           this.score < this.pokemonPropCosts.double || this.usedDoubleThisRound || this.isAnswered;
         if (this.usedDoubleThisRound) {
@@ -905,7 +905,7 @@ class BirdQuizGame {
       const cost = this.pokemonPropCosts.remove;
       if (this.score < cost) return;
       this.score -= cost;
-      this.pokemonPropCosts.remove *= 2; // 消耗翻倍
+      this.pokemonPropCosts.remove += 10; // 消耗增加 10 分
       const streakText = this.streak >= 2 ? ` 🔥${this.streak}` : "";
       this.dom.scoreIndicator.textContent = `得分: ${this.score}${streakText}`;
     } else {
@@ -941,7 +941,7 @@ class BirdQuizGame {
       const cost = this.pokemonPropCosts.time;
       if (this.score < cost) return;
       this.score -= cost;
-      this.pokemonPropCosts.time *= 2; // 消耗翻倍
+      this.pokemonPropCosts.time += 10; // 消耗增加 10 分
       const streakText = this.streak >= 2 ? ` 🔥${this.streak}` : "";
       this.dom.scoreIndicator.textContent = `得分: ${this.score}${streakText}`;
     } else {
@@ -968,7 +968,7 @@ class BirdQuizGame {
       const cost = this.pokemonPropCosts.double;
       if (this.score < cost) return;
       this.score -= cost;
-      this.pokemonPropCosts.double *= 2; // 消耗翻倍
+      this.pokemonPropCosts.double += 10; // 消耗增加 10 分
       const streakText = this.streak >= 2 ? ` 🔥${this.streak}` : "";
       this.dom.scoreIndicator.textContent = `得分: ${this.score}${streakText}`;
     } else {
@@ -1758,8 +1758,8 @@ class BirdQuizGame {
         }
       }
 
-      // 挑战结算精灵球奖励 (每满 50 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
-      const earnedBallsCount = Math.floor(this.score / 50);
+      // 挑战结算精灵球奖励 (每满 30 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
+      const earnedBallsCount = Math.floor(this.score / 30);
       const ballTypeByDiff =
         this.selectedDifficulty === "easy"
           ? "normal"
@@ -1789,7 +1789,7 @@ class BirdQuizGame {
             this.dom.rewardPokeballTitle.textContent = `🎁 结算奖励：获得 ${earnedBallsCount} 个【${ballNameMap[ballTypeByDiff]}】！`;
           }
           if (this.dom.rewardPokeballDesc) {
-            this.dom.rewardPokeballDesc.textContent = `当局斩获 ${this.score} 分（每满 50 分获 1 球）· ${diffName}题库奖励 · 已自动存入精灵球背包！`;
+            this.dom.rewardPokeballDesc.textContent = `当局斩获 ${this.score} 分（每满 30 分获 1 球）· ${diffName}题库奖励 · 已自动存入精灵球背包！`;
           }
           this.updateTrainerStatusUI();
         } else {
