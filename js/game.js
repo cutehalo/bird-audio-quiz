@@ -180,18 +180,28 @@ class BirdQuizGame {
       nextPageBtn: document.getElementById("next-page-btn"),
       pageInfo: document.getElementById("page-info"),
 
-      // 宝可梦大师图鉴 & 羁绊殿堂
+      // 宝可梦大师图鉴 & 羁绊殿堂 & 精灵球商店
       tabBtnDex: document.getElementById("tab-btn-dex"),
       tabBtnBonds: document.getElementById("tab-btn-bonds"),
+      tabBtnShop: document.getElementById("tab-btn-shop"),
       tabPokemonDex: document.getElementById("tab-pokemon-dex"),
       tabPokemonBonds: document.getElementById("tab-pokemon-bonds"),
+      tabPokemonShop: document.getElementById("tab-pokemon-shop"),
       pokemonDexFilters: document.getElementById("pokemon-dex-filters"),
       pokemonSearch: document.getElementById("pokemon-search"),
       pokemonGrid: document.getElementById("pokemon-grid"),
       bondsGrid: document.getElementById("bonds-grid"),
       pokemonPrevPage: document.getElementById("pokemon-prev-page"),
       pokemonNextPage: document.getElementById("pokemon-next-page"),
-      pokemonPageInfo: document.getElementById("pokemon-page-info")
+      pokemonPageInfo: document.getElementById("pokemon-page-info"),
+
+      // 精灵球兑换商店看板与网格
+      shopTotalPower: document.getElementById("shop-total-power"),
+      shopQtyNormal: document.getElementById("shop-qty-normal"),
+      shopQtyGreat: document.getElementById("shop-qty-great"),
+      shopQtyMaster: document.getElementById("shop-qty-master"),
+      shopFeedback: document.getElementById("shop-feedback"),
+      shopRecipesGrid: document.getElementById("shop-recipes-grid")
     };
 
     this.init();
@@ -418,8 +428,17 @@ class BirdQuizGame {
       btn.addEventListener("click", () => {
         if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
         this.dom.pokemonDexModal.classList.add("active");
-        this.renderPokemonDex();
-        this.renderBondsHall();
+        this.switchPokemonTab("dex");
+      });
+    });
+
+    // 精灵球兑换商店直达开关 (顶部导航 / 状态栏背包)
+    document.querySelectorAll(".open-shop-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.birdAudioEngine) window.birdAudioEngine.playClickSfx();
+        this.dom.pokemonDexModal.classList.add("active");
+        this.switchPokemonTab("shop");
       });
     });
 
@@ -430,24 +449,20 @@ class BirdQuizGame {
       });
     }
 
-    // 宝可梦模态窗 Tab 切换
-    if (this.dom.tabBtnDex && this.dom.tabBtnBonds) {
+    // 宝可梦模态窗 Tab 切换 (图鉴 / 羁绊 / 商店)
+    if (this.dom.tabBtnDex) {
       this.dom.tabBtnDex.addEventListener("click", () => {
-        this.pokemonActiveTab = "dex";
-        this.dom.tabBtnDex.classList.add("active");
-        this.dom.tabBtnBonds.classList.remove("active");
-        this.dom.tabPokemonDex.style.display = "block";
-        this.dom.tabPokemonBonds.style.display = "none";
-        this.renderPokemonDex();
+        this.switchPokemonTab("dex");
       });
-
+    }
+    if (this.dom.tabBtnBonds) {
       this.dom.tabBtnBonds.addEventListener("click", () => {
-        this.pokemonActiveTab = "bonds";
-        this.dom.tabBtnBonds.classList.add("active");
-        this.dom.tabBtnDex.classList.remove("active");
-        this.dom.tabPokemonBonds.style.display = "block";
-        this.dom.tabPokemonDex.style.display = "none";
-        this.renderBondsHall();
+        this.switchPokemonTab("bonds");
+      });
+    }
+    if (this.dom.tabBtnShop) {
+      this.dom.tabBtnShop.addEventListener("click", () => {
+        this.switchPokemonTab("shop");
       });
     }
 
@@ -2011,6 +2026,139 @@ class BirdQuizGame {
 
       this.dom.bondsGrid.appendChild(card);
     });
+  }
+
+  // 统一切换宝可梦模态窗 Tab
+  switchPokemonTab(tabName) {
+    this.pokemonActiveTab = tabName;
+
+    if (this.dom.tabBtnDex) this.dom.tabBtnDex.classList.toggle("active", tabName === "dex");
+    if (this.dom.tabPokemonDex) this.dom.tabPokemonDex.style.display = tabName === "dex" ? "block" : "none";
+
+    if (this.dom.tabBtnBonds) this.dom.tabBtnBonds.classList.toggle("active", tabName === "bonds");
+    if (this.dom.tabPokemonBonds) this.dom.tabPokemonBonds.style.display = tabName === "bonds" ? "block" : "none";
+
+    if (this.dom.tabBtnShop) this.dom.tabBtnShop.classList.toggle("active", tabName === "shop");
+    if (this.dom.tabPokemonShop) this.dom.tabPokemonShop.style.display = tabName === "shop" ? "block" : "none";
+
+    if (tabName === "dex") {
+      this.renderPokemonDex();
+    } else if (tabName === "bonds") {
+      this.renderBondsHall();
+    } else if (tabName === "shop") {
+      this.renderPokeBallShop();
+    }
+  }
+
+  // 渲染精灵球兑换商店
+  renderPokeBallShop() {
+    if (!window.birdPokemonSystem) return;
+
+    const counts = window.birdPokemonSystem.getPokeBallCounts();
+    const totalPower = window.birdPokemonSystem.getTotalBallPower();
+
+    if (this.dom.shopTotalPower) {
+      this.dom.shopTotalPower.textContent = `💎 综合折算价值: ${totalPower} 点普通球`;
+    }
+    if (this.dom.shopQtyNormal) {
+      this.dom.shopQtyNormal.textContent = `${counts.normal} 个`;
+    }
+    if (this.dom.shopQtyGreat) {
+      this.dom.shopQtyGreat.textContent = `${counts.great} 个`;
+    }
+    if (this.dom.shopQtyMaster) {
+      this.dom.shopQtyMaster.textContent = `${counts.master} 个`;
+    }
+
+    if (!this.dom.shopRecipesGrid) return;
+    this.dom.shopRecipesGrid.innerHTML = "";
+
+    const recipes = window.birdPokemonSystem.getExchangeRecipes();
+
+    recipes.forEach((recipe) => {
+      const currentFromCount = counts[recipe.from] || 0;
+      const maxBatches = Math.floor(currentFromCount / recipe.costPerBatch);
+      const isAffordable = maxBatches >= 1;
+
+      const card = document.createElement("div");
+      card.className = `shop-recipe-card ${isAffordable ? "affordable" : "unaffordable"}`;
+
+      const tagText = recipe.type === "upgrade" ? "✨ 升阶合成" : "🔄 拆解转换";
+      const tagClass = recipe.type === "upgrade" ? "upgrade" : "downgrade";
+
+      card.innerHTML = `
+        <div class="recipe-header">
+          <div class="recipe-formula">
+            <span>${recipe.fromIcon} × ${recipe.costPerBatch}</span>
+            <span>➔</span>
+            <span>${recipe.toIcon} × ${recipe.gainPerBatch}</span>
+          </div>
+          <span class="recipe-tag ${tagClass}">${tagText}</span>
+        </div>
+
+        <div class="recipe-desc">${recipe.desc}</div>
+
+        <div class="recipe-stock-row">
+          <span class="recipe-stock-label">背包存量: <span class="recipe-stock-val">${window.birdPokemonSystem.getBallName(recipe.from)} × ${currentFromCount}</span></span>
+          <span class="recipe-stock-label">可兑换: <span class="recipe-stock-val" style="color:${isAffordable ? '#34d399' : 'var(--text-dim)'};">${maxBatches} 份</span></span>
+        </div>
+
+        <div class="recipe-actions">
+          <button class="recipe-btn single-btn" data-recipe="${recipe.id}" data-batches="1" ${!isAffordable ? "disabled" : ""}>
+            <span>兑换 1 份</span>
+          </button>
+          <button class="recipe-btn all-btn" data-recipe="${recipe.id}" data-batches="${Math.max(1, maxBatches)}" ${!isAffordable ? "disabled" : ""}>
+            <span>全部兑换 (${maxBatches}份)</span>
+          </button>
+        </div>
+      `;
+
+      // 绑定兑换按钮点击事件
+      card.querySelectorAll(".recipe-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const recId = btn.dataset.recipe;
+          const batches = parseInt(btn.dataset.batches, 10);
+          this.handlePokeBallExchange(recId, batches);
+        });
+      });
+
+      this.dom.shopRecipesGrid.appendChild(card);
+    });
+  }
+
+  // 处理精灵球兑换
+  handlePokeBallExchange(recipeId, batches) {
+    if (!window.birdPokemonSystem) return;
+
+    const result = window.birdPokemonSystem.exchangePokeBalls(recipeId, batches);
+
+    if (this.dom.shopFeedback) {
+      this.dom.shopFeedback.style.display = "block";
+      if (result.success) {
+        this.dom.shopFeedback.style.background = "linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35))";
+        this.dom.shopFeedback.style.borderColor = "var(--emerald-400)";
+        this.dom.shopFeedback.style.color = "#a7f3d0";
+        this.dom.shopFeedback.innerHTML = `${result.message}`;
+        if (window.birdAudioEngine) window.birdAudioEngine.playBonusSfx();
+      } else {
+        this.dom.shopFeedback.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.35))";
+        this.dom.shopFeedback.style.borderColor = "var(--rose-400)";
+        this.dom.shopFeedback.style.color = "#fecdd3";
+        this.dom.shopFeedback.innerHTML = `⚠️ ${result.message}`;
+        if (window.birdAudioEngine) window.birdAudioEngine.playErrorSfx();
+      }
+
+      // 4 秒后自动隐藏提示
+      if (this.shopFeedbackTimeout) clearTimeout(this.shopFeedbackTimeout);
+      this.shopFeedbackTimeout = setTimeout(() => {
+        if (this.dom.shopFeedback) this.dom.shopFeedback.style.display = "none";
+      }, 4000);
+    }
+
+    if (result.success) {
+      this.renderPokeBallShop();
+      this.updateTrainerStatusUI();
+    }
   }
 
   // 渲染 500 鸟类自然大百科图鉴

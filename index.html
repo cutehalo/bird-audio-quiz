@@ -27,6 +27,10 @@
         <span class="nav-icon">⚡</span>
         <span class="nav-text">宝可梦图鉴 & 羁绊</span>
       </button>
+      <button class="nav-btn open-shop-btn" id="header-shop-btn" title="进入精灵球兑换商店" aria-label="精灵球商店">
+        <span class="nav-icon">🏪</span>
+        <span class="nav-text">精灵球商店</span>
+      </button>
       <button class="nav-btn open-dex-btn" id="header-dex-btn" title="查看 500 种中国鸟类大百科" aria-label="500 种中国鸟类大百科">
         <span class="nav-icon">📖</span>
         <span class="nav-text">百鸟图鉴</span>
@@ -78,11 +82,11 @@
                 <span class="metric-sub">羁绊共鸣特权</span>
               </div>
             </div>
-            <div class="metric-chip pokeball-chip" id="pokeball-bag-chip" title="精灵球背包：普通球🔴/高级球🔵/大师球🟣，答题时可直接作答并概率捕获提升星级！">
+            <div class="metric-chip pokeball-chip open-shop-btn" id="pokeball-bag-chip" title="精灵球背包：普通球🔴/高级球🔵/大师球🟣 · 点击前往精灵球兑换商店！" style="cursor: pointer;">
               <span class="metric-icon">🎒</span>
               <div class="metric-text">
                 <span class="metric-val" id="pokeball-bag-val">🔴0 🔵0 🟣0</span>
-                <span class="metric-sub">精灵球背包</span>
+                <span class="metric-sub">精灵球背包 · 商店</span>
               </div>
             </div>
           </div>
@@ -542,13 +546,16 @@
       <button class="modal-close-btn" id="close-pokemon-dex-btn">✕</button>
     </div>
 
-    <!-- 选项卡切换: 图鉴收集 vs 羁绊殿堂 -->
+    <!-- 选项卡切换: 图鉴收集 vs 羁绊殿堂 vs 精灵球商店 -->
     <div class="pokemon-tabs">
       <button class="pokemon-tab-btn active" data-tab="dex" id="tab-btn-dex">
         <span>📖 500 鸟类星级图鉴</span>
       </button>
       <button class="pokemon-tab-btn" data-tab="bonds" id="tab-btn-bonds">
         <span>✨ 同科羁绊殿堂 (<span id="bonds-count-tab">0</span>/48)</span>
+      </button>
+      <button class="pokemon-tab-btn" data-tab="shop" id="tab-btn-shop">
+        <span>🏪 精灵球兑换商店</span>
       </button>
     </div>
 
@@ -599,6 +606,75 @@
 
       <div class="bonds-grid" id="bonds-grid">
         <!-- 动态渲染科属羁绊卡片 -->
+      </div>
+    </div>
+
+    <!-- TAB 3: 精灵球兑换商店 -->
+    <div class="pokemon-tab-content" id="tab-pokemon-shop" style="display: none;">
+      <!-- 商店背包资产看板 -->
+      <div class="shop-inventory-card">
+        <div class="shop-inv-header">
+          <div class="shop-inv-title">
+            <span class="shop-icon">🎒</span>
+            <div>
+              <h4 style="margin:0; font-size:16px; color:var(--text-primary);">训练家精灵球资产背包</h4>
+              <span style="font-size:12px; color:var(--text-secondary);">答题时投掷可直接答对并概率捕获鸟类升星</span>
+            </div>
+          </div>
+          <div class="shop-total-power" id="shop-total-power">
+            💎 综合折算价值: 0 点
+          </div>
+        </div>
+
+        <div class="shop-inv-grid">
+          <div class="shop-inv-item normal-ball-card">
+            <span class="shop-ball-badge">🔴</span>
+            <div class="shop-ball-details">
+              <span class="shop-ball-name">普通精灵球</span>
+              <span class="shop-ball-qty" id="shop-qty-normal">0 个</span>
+              <span class="shop-ball-rate">基础捕获率 10% · 基准汇率 1</span>
+            </div>
+          </div>
+
+          <div class="shop-inv-item great-ball-card">
+            <span class="shop-ball-badge">🔵</span>
+            <div class="shop-ball-details">
+              <span class="shop-ball-name">高级精灵球</span>
+              <span class="shop-ball-qty" id="shop-qty-great">0 个</span>
+              <span class="shop-ball-rate">基础捕获率 20% · 等值 5 普通球</span>
+            </div>
+          </div>
+
+          <div class="shop-inv-item master-ball-card">
+            <span class="shop-ball-badge">🟣</span>
+            <div class="shop-ball-details">
+              <span class="shop-ball-name">大师精灵球</span>
+              <span class="shop-ball-qty" id="shop-qty-master">0 个</span>
+              <span class="shop-ball-rate">基础捕获率 30% · 等值 25 普通球</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 兑换规则说明横幅 -->
+      <div class="shop-rate-banner">
+        <span class="rate-icon">⚖️</span>
+        <div class="rate-text">
+          <div style="font-size:14px; font-weight:700; color:var(--amber-300); margin-bottom:2px;">
+            官方公允互换汇率：普通球 : 高级球 : 大师球 = 1 : 5 : 25
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
+            支持 6 种标准配方的升级合成与拆解转换，可根据捕获需求灵活调配背包！
+          </div>
+        </div>
+      </div>
+
+      <!-- 兑换反馈提示栏 -->
+      <div class="shop-feedback-banner" id="shop-feedback" style="display: none;"></div>
+
+      <!-- 6 种互换配方卡片网格 -->
+      <div class="shop-recipes-grid" id="shop-recipes-grid">
+        <!-- 动态渲染配方卡片 -->
       </div>
     </div>
 

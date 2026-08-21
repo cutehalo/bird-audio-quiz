@@ -194,6 +194,123 @@ class BirdPokemonSystem {
     return map[ballType] || "精灵球";
   }
 
+  // 获取所有 6 种标准精灵球互换配方 (比例: 普通:高级:大师 = 1:5:25)
+  getExchangeRecipes() {
+    return [
+      {
+        id: "normal_to_great",
+        type: "upgrade",
+        from: "normal",
+        to: "great",
+        costPerBatch: 5,
+        gainPerBatch: 1,
+        title: "普通球 ➔ 高级球",
+        desc: "5 个普通球 🔴 合成 1 个高级球 🔵 (5:1)",
+        fromIcon: "🔴",
+        toIcon: "🔵"
+      },
+      {
+        id: "great_to_master",
+        type: "upgrade",
+        from: "great",
+        to: "master",
+        costPerBatch: 5,
+        gainPerBatch: 1,
+        title: "高级球 ➔ 大师球",
+        desc: "5 个高级球 🔵 合成 1 个大师球 🟣 (5:1)",
+        fromIcon: "🔵",
+        toIcon: "🟣"
+      },
+      {
+        id: "normal_to_master",
+        type: "upgrade",
+        from: "normal",
+        to: "master",
+        costPerBatch: 25,
+        gainPerBatch: 1,
+        title: "普通球 ➔ 大师球",
+        desc: "25 个普通球 🔴 直升 1 个大师球 🟣 (25:1)",
+        fromIcon: "🔴",
+        toIcon: "🟣"
+      },
+      {
+        id: "great_to_normal",
+        type: "downgrade",
+        from: "great",
+        to: "normal",
+        costPerBatch: 1,
+        gainPerBatch: 5,
+        title: "高级球 ➔ 普通球",
+        desc: "1 个高级球 🔵 拆解为 5 个普通球 🔴 (1:5)",
+        fromIcon: "🔵",
+        toIcon: "🔴"
+      },
+      {
+        id: "master_to_great",
+        type: "downgrade",
+        from: "master",
+        to: "great",
+        costPerBatch: 1,
+        gainPerBatch: 5,
+        title: "大师球 ➔ 高级球",
+        desc: "1 个大师球 🟣 拆解为 5 个高级球 🔵 (1:5)",
+        fromIcon: "🟣",
+        toIcon: "🔵"
+      },
+      {
+        id: "master_to_normal",
+        type: "downgrade",
+        from: "master",
+        to: "normal",
+        costPerBatch: 1,
+        gainPerBatch: 25,
+        title: "大师球 ➔ 普通球",
+        desc: "1 个大师球 🟣 拆解为 25 个普通球 🔴 (1:25)",
+        fromIcon: "🟣",
+        toIcon: "🔴"
+      }
+    ];
+  }
+
+  // 精灵球互换执行方法
+  exchangePokeBalls(recipeId, batches = 1) {
+    if (batches <= 0) return { success: false, message: "兑换批次必须大于 0" };
+    const recipes = this.getExchangeRecipes();
+    const recipe = recipes.find((r) => r.id === recipeId);
+    if (!recipe) return { success: false, message: "未找到对应的兑换配方" };
+
+    const totalCost = recipe.costPerBatch * batches;
+    const totalGain = recipe.gainPerBatch * batches;
+    const currentFromCount = (this.data.pokeBalls && this.data.pokeBalls[recipe.from]) || 0;
+
+    if (currentFromCount < totalCost) {
+      return {
+        success: false,
+        message: `【${this.getBallName(recipe.from)}】存量不足！当前仅有 ${currentFromCount} 个，需要 ${totalCost} 个`
+      };
+    }
+
+    this.data.pokeBalls[recipe.from] -= totalCost;
+    this.data.pokeBalls[recipe.to] = (this.data.pokeBalls[recipe.to] || 0) + totalGain;
+    this.save();
+
+    return {
+      success: true,
+      recipe,
+      batches,
+      totalCost,
+      totalGain,
+      newCounts: this.getPokeBallCounts(),
+      message: `🎉 成功消耗 ${totalCost} 个【${this.getBallName(recipe.from)}】，兑换获得 ${totalGain} 个【${this.getBallName(recipe.to)}】！`
+    };
+  }
+
+  // 计算总球力折算价值 (基准: 1普通球=1点, 1高级球=5点, 1大师球=25点)
+  getTotalBallPower() {
+    const counts = this.getPokeBallCounts();
+    return counts.normal * 1 + counts.great * 5 + counts.master * 25;
+  }
+
   /**
    * 捕获成功：直接将鸟类在宝可梦图鉴中的星级提升 1 星！
    */

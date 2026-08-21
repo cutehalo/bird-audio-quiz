@@ -2008,6 +2008,290 @@ body {
   background: rgba(16, 185, 129, 0.15);
 }
 
+/* ==========================================================================
+   精灵球兑换商店 (PokeBall Shop) 样式
+   ========================================================================== */
+.shop-inventory-card {
+  background: rgba(13, 33, 25, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.shop-inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shop-inv-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shop-icon {
+  font-size: 24px;
+}
+
+.shop-total-power {
+  font-size: 13px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+
+.shop-inv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.shop-inv-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.shop-inv-item:hover {
+  transform: translateY(-2px);
+}
+
+.shop-inv-item.normal-ball-card {
+  border-color: rgba(244, 63, 94, 0.35);
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(0, 0, 0, 0.3));
+}
+
+.shop-inv-item.great-ball-card {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(0, 0, 0, 0.3));
+}
+
+.shop-inv-item.master-ball-card {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(0, 0, 0, 0.3));
+}
+
+.shop-ball-badge {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.shop-ball-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-ball-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.shop-ball-qty {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.normal-ball-card .shop-ball-qty { color: #fda4af; }
+.great-ball-card .shop-ball-qty { color: #7dd3fc; }
+.master-ball-card .shop-ball-qty { color: #d8b4fe; }
+
+.shop-ball-rate {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.shop-rate-banner {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rate-icon {
+  font-size: 22px;
+}
+
+.shop-feedback-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
+  border: 1px solid var(--emerald-400);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a7f3d0;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.shop-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.shop-recipe-card {
+  background: rgba(10, 26, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.shop-recipe-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.shop-recipe-card.affordable {
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.shop-recipe-card.unaffordable {
+  opacity: 0.72;
+}
+
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recipe-formula {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recipe-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.recipe-tag.upgrade {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--amber-300);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.recipe-tag.downgrade {
+  background: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.recipe-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.recipe-stock-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.recipe-stock-label {
+  color: var(--text-dim);
+}
+
+.recipe-stock-val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.recipe-btn {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.recipe-btn.single-btn {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #e0f2fe;
+}
+
+.recipe-btn.single-btn:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.35);
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.recipe-btn.all-btn {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+}
+
+.recipe-btn.all-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.recipe-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
 /* =========================================================
    8. 移动端顶部导航栏响应式适配 (仅保留图标，避免多行换行)
    ========================================================= */
@@ -2587,7 +2871,12 @@ body {
     white-space: nowrap;
   }
 
-  .dex-grid, .pokemon-grid, .bonds-grid {
+  .dex-grid, .pokemon-grid, .bonds-grid, .shop-recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .shop-inv-grid {
     grid-template-columns: 1fr;
     gap: 8px;
   }
