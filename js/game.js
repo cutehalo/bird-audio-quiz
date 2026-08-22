@@ -1027,8 +1027,7 @@ class BirdQuizGame {
     }
   }
 
-  // 更新宝可梦精灵球操作栏与针对当前鸟类的捕获概率
-  // 更新宝可梦精灵球操作栏与可用状态
+  // 更新宝可梦精灵球操作栏与针对当前题库难度的可用状态 (简单: 全球; 普通: 高级/大师; 困难: 仅大师)
   updatePokeBallActionBarUI() {
     if (!this.dom.pokeballActionBar) return;
 
@@ -1048,15 +1047,65 @@ class BirdQuizGame {
     if (this.dom.chanceGreatBall) this.dom.chanceGreatBall.textContent = "基础 20%";
     if (this.dom.chanceMasterBall) this.dom.chanceMasterBall.textContent = "基础 30%";
 
-    if (this.dom.useNormalBallBtn) this.dom.useNormalBallBtn.disabled = this.isAnswered || counts.normal <= 0;
-    if (this.dom.useGreatBallBtn) this.dom.useGreatBallBtn.disabled = this.isAnswered || counts.great <= 0;
-    if (this.dom.useMasterBallBtn) this.dom.useMasterBallBtn.disabled = this.isAnswered || counts.master <= 0;
+    const diff = this.selectedDifficulty || "hard";
+    const isNormalBallAllowed = diff === "easy";
+    const isGreatBallAllowed = diff === "easy" || diff === "normal";
+
+    // 普通球可用状态判定
+    if (this.dom.useNormalBallBtn) {
+      if (!isNormalBallAllowed) {
+        this.dom.useNormalBallBtn.disabled = true;
+        this.dom.useNormalBallBtn.classList.add("diff-locked");
+        this.dom.useNormalBallBtn.title = diff === "normal"
+          ? "🚫 普通难度不可使用普通球，仅限使用【高级球】或【大师球】"
+          : "🚫 困难难度仅限使用【大师球】";
+      } else {
+        this.dom.useNormalBallBtn.classList.remove("diff-locked");
+        this.dom.useNormalBallBtn.title = "普通精灵球：直接答对，基础 10% 概率捕获升星";
+        this.dom.useNormalBallBtn.disabled = this.isAnswered || counts.normal <= 0;
+      }
+    }
+
+    // 高级球可用状态判定
+    if (this.dom.useGreatBallBtn) {
+      if (!isGreatBallAllowed) {
+        this.dom.useGreatBallBtn.disabled = true;
+        this.dom.useGreatBallBtn.classList.add("diff-locked");
+        this.dom.useGreatBallBtn.title = "🚫 困难难度仅限使用【大师球】";
+      } else {
+        this.dom.useGreatBallBtn.classList.remove("diff-locked");
+        this.dom.useGreatBallBtn.title = "高级球：直接答对，基础 20% 概率捕获升星";
+        this.dom.useGreatBallBtn.disabled = this.isAnswered || counts.great <= 0;
+      }
+    }
+
+    // 大师球可用状态判定 (所有难度均可使用)
+    if (this.dom.useMasterBallBtn) {
+      this.dom.useMasterBallBtn.classList.remove("diff-locked");
+      this.dom.useMasterBallBtn.title = "大师球：直接答对，基础 30% 概率捕获升星";
+      this.dom.useMasterBallBtn.disabled = this.isAnswered || counts.master <= 0;
+    }
   }
 
   // 使用精灵球：直接正确作答 + 概率捕获提升 1 星 (满 3 星自动返还)
   usePokeBall(ballType) {
     if (this.isAnswered) return;
     if (!window.birdPokemonSystem) return;
+
+    // 难度权限二次校验 (简单: 全球; 普通: 高级/大师; 困难: 仅大师)
+    const diff = this.selectedDifficulty || "hard";
+    if (ballType === "normal" && diff !== "easy") {
+      if (window.birdAudioEngine) window.birdAudioEngine.playErrorSfx();
+      alert(diff === "normal" 
+        ? "🚫 当前为【普通难度】，不可使用普通球，请使用【高级球】或【大师球】！" 
+        : "🚫 当前为【困难难度】，仅限使用【大师球】！");
+      return;
+    }
+    if (ballType === "great" && diff === "hard") {
+      if (window.birdAudioEngine) window.birdAudioEngine.playErrorSfx();
+      alert("🚫 当前为【困难难度】，仅限使用【大师球】！");
+      return;
+    }
 
     const currentQ = this.questions[this.currentRound];
     if (!currentQ) return;
