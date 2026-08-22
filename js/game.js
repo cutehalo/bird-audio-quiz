@@ -1822,8 +1822,8 @@ class BirdQuizGame {
         }
       }
 
-      // 挑战结算精灵球奖励 (每满 30 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
-      const earnedBallsCount = Math.floor(this.score / 30);
+      // 宝可梦大师模式专属：挑战结算精灵球奖励 (仅在宝可梦模式下获得，每满 30 积分获得 1 个精灵球，按难度分普通球/高级球/大师球)
+      const earnedBallsCount = this.gameMode === "pokemon" ? Math.floor(this.score / 30) : 0;
       const ballTypeByDiff =
         this.selectedDifficulty === "easy"
           ? "normal"
@@ -1843,7 +1843,7 @@ class BirdQuizGame {
       };
 
       if (this.dom.summaryPokeballReward) {
-        if (earnedBallsCount > 0 && window.birdPokemonSystem) {
+        if (this.gameMode === "pokemon" && earnedBallsCount > 0 && window.birdPokemonSystem) {
           window.birdPokemonSystem.addPokeBalls(ballTypeByDiff, earnedBallsCount);
           this.dom.summaryPokeballReward.style.display = "flex";
           if (this.dom.rewardPokeballIcon) {
