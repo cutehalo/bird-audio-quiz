@@ -31,7 +31,7 @@
         <span class="nav-icon">🏪</span>
         <span class="nav-text">精灵球商店</span>
       </button>
-      <button class="nav-btn open-dex-btn" id="header-dex-btn" title="查看 500 种中国鸟类大百科" aria-label="500 种中国鸟类大百科">
+      <button class="nav-btn open-dex-btn" id="header-dex-btn" title="查看中国鸟类自然大百科" aria-label="中国鸟类自然大百科">
         <span class="nav-icon">📖</span>
         <span class="nav-text">百鸟图鉴</span>
       </button>
@@ -47,7 +47,7 @@
         <div class="hero-badge">🌿 探索大自然的交响乐</div>
         <h2 class="hero-title">你能辨识多少种<br>中国大自然的鸟鸣？</h2>
         <p class="hero-subtitle">
-          题库已全面实装 500 种中国鸟类 100% 真实野生录音！支持林鸟/水鸟专训、无尽生存挑战与全新宝可梦图鉴羁绊收集！
+          题库已全面实装 695+ 种中国鸟类 100% 真实野生录音！支持林鸟/水鸟专训、无尽生存挑战与全新宝可梦图鉴羁绊收集！
         </p>
 
         <!-- 训练师状态条 (Pokemon Mode Trainer Status) -->
@@ -71,7 +71,7 @@
             <div class="metric-chip collection-chip" title="已点亮 1 星及以上鸟类图鉴">
               <span class="metric-icon">⭐</span>
               <div class="metric-text">
-                <span class="metric-val" id="total-collected-val">0 / 500</span>
+                <span class="metric-val" id="total-collected-val">0 / 695</span>
                 <span class="metric-sub">图鉴星级收集</span>
               </div>
             </div>
@@ -108,7 +108,7 @@
               <button class="config-chip active" data-pool="all">
                 <span class="chip-icon">🌐</span>
                 <span class="chip-label">全部生境</span>
-                <span class="chip-sub">500 种全生态</span>
+                <span class="chip-sub">全生态鸟类</span>
               </button>
               <button class="config-chip" data-pool="forest">
                 <span class="chip-icon">🌲</span>
@@ -155,7 +155,7 @@
                 <span class="icon">📍</span>
                 <span>3. 区域与省级题库：</span>
               </div>
-              <span class="pool-count-badge" id="pool-count-badge">🎯 当前匹配: 500 种</span>
+              <span class="pool-count-badge" id="pool-count-badge">🎯 当前匹配: 695 种</span>
             </div>
 
             <!-- 快捷大区选择 -->
@@ -282,7 +282,7 @@
             <span>开始挑战</span>
             <span>🎧</span>
           </button>
-          <button class="secondary-link-btn open-dex-btn">📖 打开 500 鸟类自然大百科</button>
+          <button class="secondary-link-btn open-dex-btn">📖 打开中国鸟类自然大百科</button>
         </div>
       </div>
     </section>
@@ -482,12 +482,12 @@
 
 </main>
 
-<!-- 500 鸟类大百科图鉴模态窗 -->
+<!-- 中国鸟类大百科图鉴模态窗 -->
 <div class="modal-overlay" id="bird-dex-modal">
   <div class="modal-card">
     <div class="modal-header">
       <div>
-        <h3 style="margin: 0; font-size: 20px;">📖 中国鸟类自然大百科 (500 种)</h3>
+        <h3 style="margin: 0; font-size: 20px;">📖 中国鸟类自然大百科 (695+ 种)</h3>
         <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-dim);">
           涵盖中国常见鸣禽、涉禽、游禽、猛禽、攀禽与陆禽，支持即时搜索与原声试听
         </p>
@@ -497,7 +497,7 @@
 
     <!-- 分类筛选 Chips -->
     <div class="dex-filters" id="dex-filters">
-      <button class="filter-chip active" data-category="all">全部 (500)</button>
+      <button class="filter-chip active" data-category="all">全部 (695)</button>
       <button class="filter-chip" data-category="鸣禽">鸣禽 (歌鸟)</button>
       <button class="filter-chip" data-category="涉禽">涉禽 (湿地水鸟)</button>
       <button class="filter-chip" data-category="游禽">游禽 (水面潜水)</button>
@@ -518,14 +518,14 @@
       </div>
       <div class="dex-pagination-bar" id="dex-pagination-bar">
         <button class="page-btn" id="prev-page-btn" disabled>‹ 上一页</button>
-        <span class="page-info" id="page-info">第 1 / 13 页 (共 500 种)</span>
+        <span class="page-info" id="page-info">第 1 / 18 页 (共 695 种)</span>
         <button class="page-btn" id="next-page-btn">下一页 ›</button>
       </div>
     </div>
 
-    <!-- 500 鸟类卡片网格 -->
+    <!-- 鸟类卡片网格 -->
     <div class="dex-grid" id="dex-grid">
-      <!-- 动态分页渲染 500 种鸟类卡片 -->
+      <!-- 动态分页渲染鸟类卡片 -->
     </div>
   </div>
 </div>
@@ -549,7 +549,7 @@
     <!-- 选项卡切换: 图鉴收集 vs 羁绊殿堂 vs 精灵球商店 -->
     <div class="pokemon-tabs">
       <button class="pokemon-tab-btn active" data-tab="dex" id="tab-btn-dex">
-        <span>📖 500 鸟类星级图鉴</span>
+        <span>📖 中国鸟类星级图鉴</span>
       </button>
       <button class="pokemon-tab-btn" data-tab="bonds" id="tab-btn-bonds">
         <span>✨ 同科羁绊殿堂 (<span id="bonds-count-tab">0</span>/48)</span>

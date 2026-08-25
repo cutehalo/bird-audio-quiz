@@ -596,7 +596,8 @@ class BirdQuizGame {
     if (this.dom.trainerExp) this.dom.trainerExp.textContent = stats.trainerExp;
     if (this.dom.staminaVal) this.dom.staminaVal.textContent = `${stats.stamina} / ${stats.maxStamina || 10}`;
     if (this.dom.staminaCountdown) this.dom.staminaCountdown.textContent = timeInfo.text;
-    if (this.dom.totalCollectedVal) this.dom.totalCollectedVal.textContent = `${stats.totalCollected} / 500`;
+    const allBirds = Array.isArray(BIRDS_500_DATA) ? BIRDS_500_DATA : [];
+    if (this.dom.totalCollectedVal) this.dom.totalCollectedVal.textContent = `${stats.totalCollected} / ${allBirds.length || 695}`;
     if (this.dom.totalBondsVal) this.dom.totalBondsVal.textContent = `${stats.totalBonds} 科`;
     if (this.dom.bondsCountTab) this.dom.bondsCountTab.textContent = stats.totalBonds;
     if (this.dom.pokeballBagVal && stats.pokeBalls) {
