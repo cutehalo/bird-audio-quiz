@@ -157,14 +157,14 @@ function enrichAllBirdsData() {
       bird.commonRank = TOP_20_EASY_BIRDS.indexOf(bird.name) + 1;
     } else if (TOP_50_NORMAL_BIRDS.includes(bird.name)) {
       bird.commonTier = "normal";
-      bird.commonRank = 100 + TOP_50_NORMAL_BIRDS.indexOf(bird.name) + 1;
+      bird.commonRank = easyCount + TOP_50_NORMAL_BIRDS.indexOf(bird.name) + 1;
     } else {
       bird.commonTier = "hard";
-      bird.commonRank = 250 + (idx % 250);
+      bird.commonRank = normalCount + idx + 1;
     }
   });
 
-  // 按常见度升序排列，并精确重赋予 1 ~ 500 排名、Tier 与科学懂鸟稀有指数 (1.0 ~ 9.8)
+  // 按常见度升序排列，并精确重赋予 1 ~ N 排名、Tier 与科学懂鸟稀有指数 (1.0 ~ 9.8)
   birds.sort((a, b) => a.commonRank - b.commonRank);
   birds.forEach((bird, idx) => {
     bird.commonRank = idx + 1;
