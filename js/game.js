@@ -622,6 +622,9 @@ class BirdQuizGame {
     const normalLimit = Math.ceil(total * 0.50);
 
     const filtered = allBirds.filter((b) => {
+      // 0. 仅出题已收录 100% 真实独立原声的鸟类
+      if (!b.hasAudio) return false;
+
       // 1. 生境分类过滤
       if (this.selectedPool === "forest") {
         const isForest =
@@ -682,6 +685,7 @@ class BirdQuizGame {
 
     // 若筛选条件过于苛刻导致可用物种 < 4 种，按省份适当放宽保障出题
     const relaxed = allBirds.filter((b) => {
+      if (!b.hasAudio) return false;
       if (this.selectedProvince && this.selectedProvince !== "all") {
         return (
           Array.isArray(b.provinces) &&
@@ -2016,13 +2020,21 @@ class BirdQuizGame {
 
         ${bondBadgeHtml}
 
-        <button class="dex-audio-btn" style="margin-top:10px;">🔊 试听野生原声</button>
+        ${
+          bird.hasAudio
+            ? `<button class="dex-audio-btn" style="margin-top:10px;">🔊 试听野生原声</button>`
+            : `<span class="dex-status" style="margin-top:10px; display:inline-block; color:var(--text-dim); font-size:11px; padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px;">🎙️ 声音收录中</span>`
+        }
       `;
 
-      const audioBtn = card.querySelector(".dex-audio-btn");
-      audioBtn.addEventListener("click", () => {
-        window.birdAudioEngine.playBird(bird);
-      });
+      if (bird.hasAudio) {
+        const audioBtn = card.querySelector(".dex-audio-btn");
+        if (audioBtn) {
+          audioBtn.addEventListener("click", () => {
+            window.birdAudioEngine.playBird(bird);
+          });
+        }
+      }
 
       this.dom.pokemonGrid.appendChild(card);
     });
@@ -2265,7 +2277,7 @@ class BirdQuizGame {
 
     pageItems.forEach((bird, i) => {
       const globalIdx = startIdx + i + 1;
-      const hasAudio = CORE_QUIZ_BIRDS.some((cb) => cb.name === bird.name);
+      const hasAudio = !!bird.hasAudio;
       const item = document.createElement("div");
       item.className = "dex-card" + (hasAudio ? " has-audio" : "");
 
@@ -2290,7 +2302,7 @@ class BirdQuizGame {
         ${
           hasAudio
             ? `<button class="dex-audio-btn">🔊 试听原声</button>`
-            : `<span class="dex-status">🎧 题库干扰项 / 音频采集中</span>`
+            : `<span class="dex-status" style="color:var(--text-dim); font-size:11px; padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px;">🎙️ 声音收录中</span>`
         }
       `;
 
@@ -2298,8 +2310,7 @@ class BirdQuizGame {
         const audioBtn = item.querySelector(".dex-audio-btn");
         audioBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          const target = CORE_QUIZ_BIRDS.find((cb) => cb.name === bird.name) || bird;
-          window.birdAudioEngine.playBird(target);
+          window.birdAudioEngine.playBird(bird);
         });
       }
 
